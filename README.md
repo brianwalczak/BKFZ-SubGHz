@@ -90,7 +90,7 @@ At the moment, this project is solely developed and maintained by me (thanks to 
 That's great to hear! You can submit any feedback, or any bugs that you find, on the <a href='https://github.com/BrianWalczak/BKFZ-SubGHz/issues'>issues page</a>. I check these very frequently, and I highly encourage you to find bugs.
 
 ### I love this project! How can I support its maintenance?
-I'm glad to hear that you find this project useful! If you'd like to support this project and its development, you can send me a donation <a href='https://buymeacoffee.com/briann'>here</a> :)
+I'm glad to hear that you find this project useful! If you'd like to support this project and its development, you can send me a donation <a href='https://ko-fi.com/brianwalczak'>here</a> :)
 
 <br>
   <p align="center">Made with ♡ by <a href="https://www.brianwalczak.com">Briann</a></p>
