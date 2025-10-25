@@ -334,7 +334,6 @@ void onSignalChange() {
   const unsigned int duration = time - lastTime;
   int rssi = ELECHOUSE_cc1101.getRssi(); // Get the current RSSI
 
-  // removed duration >= 100
   if (sampleIndex < MAX_SAMPLES && rssi >= settings.rssi) {
     samples[sampleIndex++] = duration;
 
