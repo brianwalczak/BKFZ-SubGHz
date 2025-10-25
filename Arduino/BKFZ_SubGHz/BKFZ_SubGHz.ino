@@ -94,26 +94,21 @@ void startRecording() {
 }
 
 // Stops recording and checks if successful
-bool stopRecording(void) {
+void stopRecording() {
   detachInterrupt(digitalPinToInterrupt(GDO2_CPIN));
   status.record = "IDLE";
-
-  if (micros() - lastTime > 100000){
-    return 1;
-  }else{
-    return 0;
-  }
 }
 
 // Capture and analyze nearby frequencies w/ RSSI
-int lastFrequency = 0;
-int lastRSSI = 0;
+
 void frequencyAnalyzer() {
   status.detect = "RUNNING";
   Serial.println(F("Frequency analyzer has been started by the user (watch for websockets)."));
 
-  // Store old settings to revert when done
+  // Store old settings to revert when done and last seen frequency/RSSI
   int old_freq = settings.frequency;
+  int lastFrequency = 0;
+  int lastRSSI = 0;
 
   while(status.detect == "RUNNING") {
     int highestRssi = -INFINITY;
@@ -125,15 +120,15 @@ void frequencyAnalyzer() {
 
       int rssi = ELECHOUSE_cc1101.getRssi(); // Get the current RSSI
 
-      // This signal is stronger than the one before
-      if(rssi >= highestRssi) {
+      // This signal is stronger than the one before and within threshold
+      if(rssi >= highestRssi && rssi >= settings.detect_rssi) {
         highestRssi = rssi;
         strongestFreq = frequency;
       }
     }
 
-    // If the strongest signal is within the RSSI threshold
-    if(highestRssi >= settings.detect_rssi && strongestFreq != lastFrequency && highestRssi != lastRSSI) {
+    // If the signal is unique compared to last time, send through websocket
+    if(strongestFreq != lastFrequency && highestRssi != lastRSSI) {
       DynamicJsonDocument doc(128);
       doc["url"] = "/analyzer";
       doc["data"]["freq"] = String(strongestFreq);
@@ -142,9 +137,10 @@ void frequencyAnalyzer() {
       String jsonString;
       serializeJson(doc, jsonString);
 
-      // Used to prevent repetition of the same signal
+      // Set the frequency to last seen (used to prevent repetition of the same signal)
       lastFrequency = strongestFreq;
       lastRSSI = highestRssi;
+
       ws.textAll(jsonString);
       jsonString.clear(); // clean up json string
     }
@@ -181,7 +177,6 @@ void smoothenSamples() {
   long signaltimings[signalstorage * 2];
   int signaltimingscount[signalstorage];
   long signaltimingssum[signalstorage];
-  long signalsum = 0;
 
   // Initialize signal timings with default values
   for (int i = 0; i < signalstorage; i++) {
@@ -189,11 +184,6 @@ void smoothenSamples() {
     signaltimings[i * 2 + 1] = 0;   // Maximum timing
     signaltimingscount[i] = 0;      // Count of timings in this range
     signaltimingssum[i] = 0;        // Sum of timings in this range
-  }
-
-  // Sum up all signal samples
-  for (int i = 1; i < sampleIndex; i++) {
-    signalsum += samples[i];
   }
 
   // Group signals into timing ranges
@@ -292,9 +282,7 @@ void smoothenSamples() {
   sampleIndex = smoothCount; // Update sample index to smoothed count
   for (int i = 0; i < smoothCount; i++) {
     samples[i] = tempSmooth[i];
-  }
-
-  return;   
+  } 
 }
 
 void flushSamples() {
@@ -346,11 +334,8 @@ void onSignalChange() {
   const unsigned int duration = time - lastTime;
   int rssi = ELECHOUSE_cc1101.getRssi(); // Get the current RSSI
 
-  if (duration > 100000) {
-    sampleIndex = 0;
-  }
-
-  if (duration >= 100 && sampleIndex < MAX_SAMPLES && rssi >= settings.rssi) {
+  // removed duration >= 100
+  if (sampleIndex < MAX_SAMPLES && rssi >= settings.rssi) {
     samples[sampleIndex++] = duration;
 
     graphSkipped++;
@@ -383,15 +368,12 @@ void onWsEvent(AsyncWebSocket* server, AsyncWebSocketClient* client, AwsEventTyp
 
       if (status.record == "RUNNING") {
         stopRecording();
-
         Serial.println(F("A websocket user has been disconnected from Recording."));
       }
       break;
-
     case WS_EVT_ERROR:
       Serial.printf("WebSocket error: %s\n", (char*)arg);
       break;
-
     case WS_EVT_DATA: {
       if (len > 0) {
         DynamicJsonDocument doc(MAX_SAMPLES + 1024);
@@ -475,7 +457,6 @@ void setup() {
   while (!Serial) { ; }
 
   // -- Web Server Setup -- //
-   /* This is the regular configuration, however you can use the already-existing network for testing purposes */
   WiFi.softAP(ssid, password);
   IPAddress IP = WiFi.softAPIP();
 
@@ -554,7 +535,7 @@ void setup() {
       String lengthParam = request->getParam("length", true)->value();
       String presetParam = request->getParam("preset", true)->value();
       int reqLength = lengthParam.toInt();
-      int reqSamples[reqLength];// error: basically if they record something large and then try this, the samplesParam is empty (maybe memory overflow)
+      int reqSamples[reqLength]; // error: basically if they record something large and then try this, the samplesParam is empty (maybe memory overflow)
 
       // Reconstruct samples array from response
       DynamicJsonDocument doc(MAX_SAMPLES + 1024);
