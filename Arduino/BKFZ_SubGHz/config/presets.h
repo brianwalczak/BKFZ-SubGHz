@@ -15,45 +15,107 @@
 */
 
 const uint8_t AM270[] = {
-  CC1101_MDMCFG2, 0x30, // Format ASK/OOK, No preamble/sync
-  CC1101_PKTCTRL0, 0x32, // Async, continious, no whitening
-  CC1101_MDMCFG4, 0x67, // Rx BW filter is 270.833333kHz
-  CC1101_MDMCFG3, 0x32, // Data rate is 3.79372 kBaud
+    CC1101_IOCFG0, 0x0D, // GD0 as async serial data output/input
+    CC1101_FIFOTHR, 0x47, // RX FIFO and TX FIFO thresholds
+    CC1101_PKTCTRL0, 0x32, // Async, continious, no whitening
+    CC1101_FSCTRL1, 0x06, // Frequency synthesizer control (152343.75Hz)
 
-  CC1101_MDMCFG0, 0x00, // Channel spacing is 25kHz
-  CC1101_MDMCFG1, 0x00, // Channel spacing is 25kHz
+    /* Modem Configuration */
+    CC1101_MDMCFG0, 0x00, // Channel spacing is 25kHz
+    CC1101_MDMCFG1, 0x00, // Channel spacing is 25kHz
+    CC1101_MDMCFG2, 0x30, // Format ASK/OOK, no preamble/sync
+    CC1101_MDMCFG3, 0x32, // Data rate is 3.79372 kBaud
+    CC1101_MDMCFG4, 0x67, // Rx BW filter is 270.833333kHz
+
+    CC1101_MCSM0, 0x18, // Calibrate when going from IDLE to RX or TX mode (Main Radio Control State Machine)
+    CC1101_FOCCFG, 0x18, // no frequency offset compensation (Frequency Offset Compensation Configuration)
+
+    /* Automatic Gain Control */
+    CC1101_AGCCTRL0, 0x40,
+    CC1101_AGCCTRL1, 0x00,
+    CC1101_AGCCTRL2, 0x03,
+
+    CC1101_WORCTRL, 0xFB, // Wake on radio control
+    CC1101_FREND0, 0x11, // Front end TX configuration
+    CC1101_FREND1, 0xB6, // Front end RX configuration
 };
 
 const uint8_t AM650[] = {
-  CC1101_MDMCFG2, 0x30, // Format ASK/OOK, No preamble/sync
-  CC1101_PKTCTRL0, 0x32, // Async, continious, no whitening
-  CC1101_MDMCFG4, 0x17, // Rx BW filter is 650.000kHz
-  CC1101_MDMCFG3, 0x32, // Data rate is 3.79372 kBaud
+    CC1101_IOCFG0, 0x0D, // GD0 as async serial data output/input
+    CC1101_FIFOTHR, 0x07, // RX FIFO and TX FIFO thresholds
+    CC1101_PKTCTRL0, 0x32, // Async, continious, no whitening
+    CC1101_FSCTRL1, 0x06, // Frequency synthesizer control (152343.75Hz)
 
-  CC1101_MDMCFG0, 0x00, // Channel spacing is 25kHz
-  CC1101_MDMCFG1, 0x00, // Channel spacing is 25kHz
+    /* Modem Configuration */
+    CC1101_MDMCFG0, 0x00, // Channel spacing is 25kHz
+    CC1101_MDMCFG1, 0x00, // Channel spacing is 25kHz
+    CC1101_MDMCFG2, 0x30, // Format ASK/OOK, no preamble/sync
+    CC1101_MDMCFG3, 0x32, // Data rate is 3.79372 kBaud
+    CC1101_MDMCFG4, 0x17, // Rx BW filter is 650.000kHz
+
+    CC1101_MCSM0, 0x18, // Calibrate when going from IDLE to RX or TX mode (Main Radio Control State Machine)
+    CC1101_FOCCFG, 0x18, // no frequency offset compensation (Frequency Offset Compensation Configuration)
+
+    /* Automatic Gain Control */
+    CC1101_AGCCTRL0, 0x91,
+    CC1101_AGCCTRL1, 0x0,
+    CC1101_AGCCTRL2, 0x07,
+
+    CC1101_WORCTRL, 0xFB, // Wake on radio control
+    CC1101_FREND0, 0x11, // Front end TX configuration
+    CC1101_FREND1, 0xB6, // Front end RX configuration
 };
 
 const uint8_t FM238[] = {
-  CC1101_MDMCFG2, 0x04, // Format 2-FSK/FM, No preamble/sync, Disable (current optimized)
-  CC1101_PKTCTRL0, 0x32, CC1101_PKTCTRL1, 0x04, // Async, continious, no whitening
-  CC1101_MDMCFG4, 0x67, //Rx BW filter is 270.833333 kHz
-  CC1101_MDMCFG3, 0x83, // Data rate is 4.79794 kBaud
-  CC1101_DEVIATN, 0x04, //Deviation 2.380371 kHz
+    CC1101_IOCFG0, 0x0D, // GD0 as async serial data output/input
+    CC1101_FSCTRL1, 0x06, // Frequency synthesizer control (152343.75Hz)
+    CC1101_PKTCTRL0, 0x32, CC1101_PKTCTRL1, 0x04, // Async, continious, no whitening
 
-  CC1101_MDMCFG0, 0x00, // Channel spacing is 25kHz
-  CC1101_MDMCFG1, 0x02, // Channel spacing is 100 kHz
+    /* Modem Configuration */
+    CC1101_MDMCFG0, 0x00, // Channel spacing is 25kHz
+    CC1101_MDMCFG1, 0x02, // Channel spacing is 100 kHz
+    CC1101_MDMCFG2, 0x04, // Format 2-FSK/FM, no preamble/sync, disable
+    CC1101_MDMCFG3, 0x83, // Data rate is 4.79794 kBaud
+    CC1101_MDMCFG4, 0x67, // Rx BW filter is 270.833333 kHz
+    CC1101_DEVIATN, 0x04, // Deviation is set to 2.380371 kHz
+
+    CC1101_MCSM0, 0x18, // Calibrate when going from IDLE to RX or TX mode (Main Radio Control State Machine)
+    CC1101_FOCCFG, 0x16, // no frequency offset compensation (Frequency Offset Compensation Configuration)
+
+    /* Automatic Gain Control */
+    CC1101_AGCCTRL0, 0x91,
+    CC1101_AGCCTRL1, 0x00,
+    CC1101_AGCCTRL2, 0x07,
+
+    CC1101_WORCTRL, 0xFB, // Wake on radio control
+    CC1101_FREND0, 0x10, // Front end TX configuration
+    CC1101_FREND1, 0x56, // Front end RX configuration
 };
 
 const uint8_t FM476[] = {
-  CC1101_MDMCFG2, 0x04, // Format 2-FSK/FM, No preamble/sync, Disable (current optimized)
-  CC1101_PKTCTRL0, 0x32, CC1101_PKTCTRL1, 0x04, // Async, continious, no whitening
-  CC1101_MDMCFG4, 0x67, //Rx BW filter is 270.833333 kHz
-  CC1101_MDMCFG3, 0x83, // Data rate is 4.79794 kBaud
-  CC1101_DEVIATN, 0x47, //Deviation 47.60742 kHz
+    CC1101_IOCFG0, 0x0D, // GD0 as async serial data output/input
+    CC1101_FSCTRL1, 0x06, // Frequency synthesizer control (152343.75Hz)
+    CC1101_PKTCTRL0, 0x32, CC1101_PKTCTRL1, 0x04, // Async, continious, no whitening
 
-  CC1101_MDMCFG0, 0x00, // Channel spacing is 25kHz
-  CC1101_MDMCFG1, 0x02, // Channel spacing is 100 kHz
+    /* Modem Configuration */
+    CC1101_MDMCFG0, 0x00, // Channel spacing is 25kHz
+    CC1101_MDMCFG1, 0x02, // Channel spacing is 100 kHz
+    CC1101_MDMCFG2, 0x04, // Format 2-FSK/FM, no preamble/sync, disable
+    CC1101_MDMCFG3, 0x83, // Data rate is 4.79794 kBaud
+    CC1101_MDMCFG4, 0x67, // Rx BW filter is 270.833333 kHz
+    CC1101_DEVIATN, 0x47, // Deviation is set to 47.60742 kHz
+
+    CC1101_MCSM0, 0x18, // Calibrate when going from IDLE to RX or TX mode (Main Radio Control State Machine)
+    CC1101_FOCCFG, 0x16, // no frequency offset compensation (Frequency Offset Compensation Configuration)
+
+    /* Automatic Gain Control */
+    CC1101_AGCCTRL0, 0x91,
+    CC1101_AGCCTRL1, 0x00,
+    CC1101_AGCCTRL2, 0x07,
+
+    CC1101_WORCTRL, 0xFB, // Wake on radio control
+    CC1101_FREND0, 0x10, // Front end TX configuration
+    CC1101_FREND1, 0x56, // Front end RX configuration
 };
 
 
