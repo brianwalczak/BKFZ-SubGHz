@@ -334,7 +334,7 @@ void onSignalChange() {
   const unsigned int duration = time - lastTime;
   int rssi = ELECHOUSE_cc1101.getRssi(); // Get the current RSSI
 
-  if (sampleIndex < MAX_SAMPLES && rssi >= settings.rssi) {
+  if (sampleIndex < MAX_SAMPLES && (rssi >= settings.rssi || settings.rssi == -200)) {
     samples[sampleIndex++] = duration;
 
     graphSkipped++;

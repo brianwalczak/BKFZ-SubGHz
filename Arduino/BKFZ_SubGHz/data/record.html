@@ -219,7 +219,7 @@
 				URL.revokeObjectURL(url);
 			});
 			
-			$(".before .status").text(`${window.settings.preset} | ${(window.settings.frequency / 1000000).toFixed(2)} MHz | ${window.settings.rssi} RSSI`); // window.settings is injected server-side
+			$(".before .status").text(`${window.settings.preset} | ${(window.settings.frequency / 1000000).toFixed(2)} MHz | ${window.settings.rssi.toString() === "-200" ? 'Any' : window.settings.rssi} RSSI`); // window.settings is injected server-side
 		});
     </script>
 </body>

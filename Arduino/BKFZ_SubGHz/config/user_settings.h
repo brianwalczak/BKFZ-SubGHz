@@ -31,7 +31,7 @@ struct Settings {
 struct SettingsOptions {
   String preset[numPresets];
   int frequency[17];
-  int rssi[10];
+  int rssi[11];
 };
 
 // Used to display the status of the device (detecting, running, etc.)
@@ -81,7 +81,7 @@ static SettingsOptions settingsOptions = {
     915000000,
     925000000,
   },
-  { -85, -80, -75, -70, -65, -60, -55, -50, -45, -40 } // RSSI threshold
+  { -200, -85, -80, -75, -70, -65, -60, -55, -50, -45, -40 } // RSSI threshold
 };
 
 

@@ -165,7 +165,12 @@
 
 				$('#preset .selected').text(presetVal);
 				$('#frequency .selected').text((frequencyVal / 1000000).toFixed(2) + ' MHz');
-				$('#rssi .selected').text(rssiVal + ' dBm');
+
+				if (rssiVal.toString() === "-200") {
+					$('#rssi .selected').text('- - - - -');
+				} else {
+					$('#rssi .selected').text(rssiVal + ' dBm');
+				}
 
 				$('#preset input').val(presetVal);
 				$('#frequency input').val(frequencyVal);
