@@ -2,9 +2,7 @@ import React, { useEffect, useState } from "react";
 import { EventSubscription, StyleSheet, Text, View } from "react-native";
 import BleManager, { BleState } from 'react-native-ble-manager';
 import { SafeAreaView } from "react-native-safe-area-context";
-
-import BluetoothError from "../components/ble_error";
-import BluetoothOff from "../components/ble_off";
+import BluetoothWarning from "../components/ble_warning";
 
 const styles = StyleSheet.create({
     container: {
@@ -70,8 +68,8 @@ export default function Index() {
             <Text style={styles.subtitle}>Choose a Bluetooth device below to connect.</Text>
 
             <View style={styles.content}>
-                {(btState === null || btState === BleState.Unknown || btState === BleState.Resetting || btState === BleState.Unsupported || btState === BleState.Unauthorized) && <BluetoothError />}
-                {(btState !== null && btState !== BleState.On) ? <BluetoothOff /> : <Text style={{ color: "green" }}>Bluetooth State: Powered On</Text>}
+                {(btState === null || btState === BleState.Unknown || btState === BleState.Resetting || btState === BleState.Unsupported || btState === BleState.Unauthorized) && <BluetoothWarning reason="error" />}
+                {(btState !== null && btState !== BleState.On) ? <BluetoothWarning /> : <Text style={{ color: "green" }}>Bluetooth State: Powered On</Text>}
             </View>
         </SafeAreaView>
     );

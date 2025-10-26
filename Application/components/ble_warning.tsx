@@ -21,7 +21,6 @@ const styles = StyleSheet.create({
     },
     button: {
         marginTop: 22,
-        backgroundColor: '#DC2626',
         paddingVertical: 10,
         paddingHorizontal: 34,
         borderRadius: 100
@@ -34,6 +33,29 @@ const styles = StyleSheet.create({
         textAlign: 'center'
     }
 });
+
+const activity = {
+    disabled: {
+        title: 'Bluetooth is Off',
+        subtitle: 'Bluetooth is required to connect your device.',
+        primaryColor: '#3B82F6',
+        buttonText: 'Open Settings',
+        action: openSettings
+    },
+    error: {
+        title: 'Unsupported Device',
+        subtitle: 'Your device does not support Bluetooth connection.',
+        primaryColor: '#DC2626',
+        buttonText: 'Close Application',
+        action: closeApplication
+    },
+} as const;
+
+type ActivityKey = keyof typeof activity;
+
+interface Props {
+    reason?: ActivityKey;
+}
 
 function openSettings() {
     if (Platform.OS === 'android') {
@@ -51,15 +73,15 @@ function closeApplication() {
     }
 }
 
-export default function BluetoothOff() {
+export default function BluetoothWarning({ reason = 'disabled' }: Props) {
     return (
         <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1 }}>
-            <MaterialIcons name="bluetooth-disabled" size={60} color="#DC2626" />
-            <Text style={styles.title}>Unsupported Device</Text>
-            <Text style={styles.subtitle}>Your device does not support Bluetooth connection.</Text>
+            <MaterialIcons name="bluetooth-disabled" size={60} color={activity[reason].primaryColor} />
+            <Text style={styles.title}>{activity[reason].title}</Text>
+            <Text style={styles.subtitle}>{activity[reason].subtitle}</Text>
 
-            <TouchableOpacity style={styles.button} onPress={closeApplication} activeOpacity={0.8}>
-                <Text style={styles.buttonText}>Close Application</Text>
+            <TouchableOpacity style={[styles.button, { backgroundColor: activity[reason].primaryColor }]} onPress={activity[reason].action} activeOpacity={0.8}>
+                <Text style={styles.buttonText}>{activity[reason].buttonText}</Text>
             </TouchableOpacity>
         </View>
     );
