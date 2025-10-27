@@ -52,7 +52,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }, []);
 
     const disconnectDevice = async () => {
-        if (!permissions) return false;
+        if (!permissions || !btInit) return false;
         if (btConnected) {
             try {
                 await BleManager.disconnect(btConnected);
@@ -63,7 +63,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     };
 
     const connectDevice = async (id: string) => {
-        if (!permissions) return false;
+        if (!permissions || !btInit) return false;
         if (btConnected) await disconnectDevice();
         let timeoutId: ReturnType<typeof setTimeout>;
 
@@ -153,7 +153,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     // handle bluetooth state changes and scanning
     useEffect(() => {
-        if (!permissions || btConnected) return; // no need to scan if connected
+        if (!permissions || btConnected || !btInit) return; // no need to scan if connected
 
         // remove any old listeners
         if (scanSub.current) {
