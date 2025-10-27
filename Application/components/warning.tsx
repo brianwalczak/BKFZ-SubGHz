@@ -40,7 +40,7 @@ const activity = {
         subtitle: 'Bluetooth is required to connect your device.',
         primaryColor: '#3B82F6',
         buttonText: 'Open Settings',
-        action: openSettings
+        action: openBluetooth
     },
     'ble-error': {
         title: 'Unsupported Device',
@@ -52,7 +52,7 @@ const activity = {
     'permissions': {
         title: 'Permissions Required',
         subtitle: 'Bluetooth permissions are required to connect your device.',
-        primaryColor: '#F59E0B',
+        primaryColor: '#DC2626',
         buttonText: 'Open Settings',
         action: openSettings
     }
@@ -64,6 +64,14 @@ interface Props {
 }
 
 function openSettings() {
+    if (Platform.OS === 'android') {
+        Linking.openSettings();
+    } else if (Platform.OS === 'ios') {
+        Linking.openURL('app-settings:');
+    }
+}
+
+function openBluetooth() {
     if (Platform.OS === 'android') {
         Linking.sendIntent("android.settings.BLUETOOTH_SETTINGS");
     } else if (Platform.OS === 'ios') {
