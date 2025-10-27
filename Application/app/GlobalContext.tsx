@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import { EventSubscription, Platform } from "react-native";
 import { request, check, PERMISSIONS, RESULTS } from "react-native-permissions";
 import BleManager, { BleState } from 'react-native-ble-manager';
+import { usePathname, useRouter } from "expo-router";
 const GlobalContext = createContext<any>(undefined);
 
 export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -14,6 +15,8 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const [btConnected, setBtConnected] = useState<string | null>(null);
     const [btInit, setBtInit] = useState<boolean>(false);
     const [devices, setDevices] = useState<any[]>([]);
+    const router = useRouter();
+    const pathname = usePathname();
 
     const requestPermissions = useCallback(async () => {
         if (Platform.OS === "android") {
@@ -92,7 +95,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             try {
                 BleManager.disconnect(id);
             } catch { };
-            
+
             return false;
         }
     };
@@ -133,11 +136,19 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
             btConnectSub.current = BleManager.onConnectPeripheral((device: any) => {
                 setBtConnected(device?.peripheral); // register for connects
+
+                if (pathname === "/") {
+                    router.replace("/home");
+                }
             });
 
             btDisconnectSub.current = BleManager.onDisconnectPeripheral((device: any) => {
                 if (btConnected && device?.peripheral === btConnected) {
                     setBtConnected(null); // register for disconnects
+
+                    if (pathname !== "/") {
+                        router.replace("/");
+                    }
                 }
             });
         };

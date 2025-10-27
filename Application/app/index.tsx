@@ -4,7 +4,6 @@ import { BleState } from 'react-native-ble-manager';
 import { SafeAreaView } from "react-native-safe-area-context";
 import Warning from "../components/warning";
 import { useGlobal } from "./GlobalContext";
-import { useRouter } from "expo-router";
 
 const styles = StyleSheet.create({
     container: {
@@ -52,7 +51,6 @@ const styles = StyleSheet.create({
 export default function Index() {
     const { permissions, btState, devices, connectDevice } = useGlobal();
     const [connectingId, setConnectingId] = useState<string | null>(null);
-    const router = useRouter();
 
     async function connect(id: string) {
         if (!permissions) return;
