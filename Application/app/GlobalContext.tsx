@@ -9,7 +9,8 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const [btState, setBtState] = useState<BleState | null>(null);
     const scanSub = React.useRef<EventSubscription | null>(null);
     const btStateSub = React.useRef<EventSubscription | null>(null);
-    const [btConnected, setBtConnected] = useState(null);
+    const btDisconnectSub = React.useRef<EventSubscription | null>(null);
+    const [btConnected, setBtConnected] = useState<string | null>(null);
     const [btInit, setBtInit] = useState(false);
     const [devices, setDevices] = useState<any[]>([]);
 
@@ -49,6 +50,53 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         return permissions;
     }, []);
 
+    const disconnectDevice = async () => {
+        if (btConnected) {
+            try {
+                await BleManager.disconnect(btConnected);
+            } catch { };
+
+            setBtConnected(null);
+        }
+
+        return true;
+    };
+
+    const connectDevice = async (id: string) => {
+        if (btConnected) await disconnectDevice();
+        let timeoutId: ReturnType<typeof setTimeout>;
+
+        try {
+            const connect = BleManager.connect(id).then(() => {
+                clearTimeout(timeoutId);
+                setBtConnected(id);
+                return true;
+            }).catch(() => {
+                clearTimeout(timeoutId);
+                return false;
+            });
+
+            // 10 second timeout for connection attempts
+            const timeout = new Promise<boolean>((resolve) => {
+                timeoutId = setTimeout(() => {
+                    try {
+                        BleManager.disconnect(id);
+                    } catch { };
+
+                    resolve(false);
+                }, 10000);
+            });
+
+            return await Promise.race([connect, timeout]);
+        } catch {
+            try {
+                BleManager.disconnect(id);
+            } catch { };
+            
+            return false;
+        }
+    };
+
     // request user permissions on mount, update the state once requested
     useEffect(() => {
         if (permissions) return; // no request if already granted
@@ -78,8 +126,15 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             }
 
             BleManager.checkState(); // initial state check
+
             btStateSub.current = BleManager.onDidUpdateState((args: { state: BleState }) => {
                 setBtState(args.state); // register for state updates
+            });
+
+            btDisconnectSub.current = BleManager.onDisconnectPeripheral((device: any) => {
+                if (btConnected && device?.peripheral === btConnected) {
+                    setBtConnected(null); // register for disconnects
+                }
             });
         };
 
@@ -87,6 +142,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
         return () => {
             btStateSub.current?.remove();
+            btDisconnectSub.current?.remove();
         };
     }, [permissions]);
 
@@ -142,7 +198,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }, []);
 
     return (
-        <GlobalContext.Provider value={{ permissions, btState, btConnected, devices }}>
+        <GlobalContext.Provider value={{ permissions, btState, btConnected, devices, connectDevice }}>
             {children}
         </GlobalContext.Provider>
     );
