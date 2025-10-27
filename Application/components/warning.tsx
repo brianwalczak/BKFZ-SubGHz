@@ -35,26 +35,32 @@ const styles = StyleSheet.create({
 });
 
 const activity = {
-    disabled: {
+    'ble-disabled': {
         title: 'Bluetooth is Off',
         subtitle: 'Bluetooth is required to connect your device.',
         primaryColor: '#3B82F6',
         buttonText: 'Open Settings',
         action: openSettings
     },
-    error: {
+    'ble-error': {
         title: 'Unsupported Device',
         subtitle: 'Your device does not support Bluetooth connection.',
         primaryColor: '#DC2626',
         buttonText: 'Close Application',
         action: closeApplication
     },
+    'permissions': {
+        title: 'Permissions Required',
+        subtitle: 'Bluetooth permissions are required to connect your device.',
+        primaryColor: '#F59E0B',
+        buttonText: 'Open Settings',
+        action: openSettings
+    }
 } as const;
 
-type ActivityKey = keyof typeof activity;
-
 interface Props {
-    reason?: ActivityKey;
+    reason?: (keyof typeof activity);
+    icon?: string;
 }
 
 function openSettings() {
@@ -73,10 +79,10 @@ function closeApplication() {
     }
 }
 
-export default function BluetoothWarning({ reason = 'disabled' }: Props) {
+export default function Warning({ reason = 'permissions', icon = 'bluetooth-disabled' }: Props) {
     return (
         <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1 }}>
-            <MaterialIcons name="bluetooth-disabled" size={60} color={activity[reason].primaryColor} />
+            <MaterialIcons name={icon as any} size={60} color={activity[reason].primaryColor} />
             <Text style={styles.title}>{activity[reason].title}</Text>
             <Text style={styles.subtitle}>{activity[reason].subtitle}</Text>
 
