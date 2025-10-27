@@ -19,6 +19,13 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const router = useRouter();
     const pathname = usePathname();
 
+    const devicesRef = React.useRef(devices);
+    const btConnectedRef = React.useRef(btConnected);
+
+    // keep refs in sync w/ state for event handlers
+    useEffect(() => { devicesRef.current = devices; }, [devices]);
+    useEffect(() => { btConnectedRef.current = btConnected; }, [btConnected]);
+
     // request bluetooth permissions from the user
     const requestPermissions = useCallback(async () => {
         if (Platform.OS === "android") {
@@ -161,11 +168,11 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             });
 
             btConnectSub.current = BleManager.onConnectPeripheral(async (device: any) => {
-                if (!btConnected) {
+                if (!btConnectedRef.current) {
                     // try to find the device name for validation
                     let deviceName = null;
 
-                    const found = devices.find(d => d.id === device?.peripheral);
+                    const found = devicesRef.current.find(d => d.id === device?.peripheral);
                     if (found) {
                         deviceName = found.name;
                     } else {
@@ -182,7 +189,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             });
 
             btDisconnectSub.current = BleManager.onDisconnectPeripheral((device: any) => {
-                if (btConnected && device?.peripheral === btConnected) {
+                if (btConnectedRef.current && device?.peripheral === btConnectedRef.current) {
                     setBtConnected(null); // register for disconnects
                 }
             });
@@ -198,12 +205,6 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     // handle bluetooth state changes and scanning
     useEffect(() => {
         if (!permissions || btConnected || !btInit) return; // no need to scan if connected
-
-        // remove any old listeners
-        if (scanSub.current) {
-            scanSub.current.remove();
-            BleManager.stopScan();
-        }
 
         if (btState === BleState.On) {
             // start scanning once Bluetooth is enabled
@@ -233,7 +234,15 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                 });
             } catch { };
         }
-    }, [btState, permissions, btConnected]);
+
+        // cleanup on unmount or dependency change :D
+        return () => {
+            if (scanSub.current) {
+                scanSub.current.remove();
+                BleManager.stopScan();
+            }
+        };
+    }, [btState, permissions, btConnected, btInit]);
 
     // remove old devices if no longer seen
     useEffect(() => {
