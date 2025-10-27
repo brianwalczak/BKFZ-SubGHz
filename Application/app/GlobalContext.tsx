@@ -5,13 +5,13 @@ import BleManager, { BleState } from 'react-native-ble-manager';
 const GlobalContext = createContext<any>(undefined);
 
 export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [permissions, setPermissions] = useState(false);
+    const [permissions, setPermissions] = useState<boolean>(false);
     const [btState, setBtState] = useState<BleState | null>(null);
     const scanSub = React.useRef<EventSubscription | null>(null);
     const btStateSub = React.useRef<EventSubscription | null>(null);
     const btDisconnectSub = React.useRef<EventSubscription | null>(null);
     const [btConnected, setBtConnected] = useState<string | null>(null);
-    const [btInit, setBtInit] = useState(false);
+    const [btInit, setBtInit] = useState<boolean>(false);
     const [devices, setDevices] = useState<any[]>([]);
 
     const requestPermissions = useCallback(async () => {
