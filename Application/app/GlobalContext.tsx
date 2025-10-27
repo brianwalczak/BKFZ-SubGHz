@@ -20,31 +20,45 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         } else {
             setPermissions(true); // iOS or anything else i guess
         }
+
+        return permissions;
+    }, []);
+
+    const checkPermissions = useCallback(async () => {
+        if (Platform.OS === "android") {
+            const scan = await check(PERMISSIONS.ANDROID.BLUETOOTH_SCAN);
+            const connect = await check(PERMISSIONS.ANDROID.BLUETOOTH_CONNECT);
+            const location = await check(PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION);
+
+            if (scan === RESULTS.GRANTED && connect === RESULTS.GRANTED && location === RESULTS.GRANTED) {
+                setPermissions(true);
+            } else {
+                setPermissions(false);
+            }
+        } else {
+            setPermissions(true); // iOS or anything else i guess
+        }
+
+        return permissions;
     }, []);
 
     // request user permissions on mount, update the state once requested
     useEffect(() => {
+        if (permissions) return; // no request if already granted
+
         requestPermissions();
     }, [requestPermissions]);
 
     // check for permission changes every 2 seconds in case user manually changes them
     useEffect(() => {
-        const interval = setInterval(async () => {
-            if (!permissions) {
-                const scan = await check(PERMISSIONS.ANDROID.BLUETOOTH_SCAN);
-                const connect = await check(PERMISSIONS.ANDROID.BLUETOOTH_CONNECT);
-                const location = await check(PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION);
+        if (permissions) return; // no polling if already granted
 
-                if (scan === RESULTS.GRANTED && connect === RESULTS.GRANTED && location === RESULTS.GRANTED) {
-                    setPermissions(true);
-                } else {
-                    setPermissions(false);
-                }
-            }
+        const interval = setInterval(() => {
+            checkPermissions();
         }, 2000);
 
         return () => clearInterval(interval);
-    }, [requestPermissions]);
+    }, [permissions, checkPermissions]);
 
     return (
         <GlobalContext.Provider value={{ permissions, requestPermissions }}>
