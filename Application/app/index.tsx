@@ -60,17 +60,30 @@ export default function Index() {
         if (!permissions) return;
         setConnectingId(id);
 
+        const timeout = setTimeout(() => {
+            try {
+                BleManager.disconnect(id);
+            } catch { };
+
+            setConnectingId(null);
+        }, 10000);
+
         try {
             BleManager.connect(id).then(() => {
+                clearTimeout(timeout);
+
                 console.log("Connected to", id);
                 setConnectingId(null);
             }).catch((error) => {
+                clearTimeout(timeout);
+
                 console.log("Connection error:", error);
                 setConnectingId(null);
             });
         } catch {
+            clearTimeout(timeout);
             setConnectingId(null);
-        };
+        }
     }
 
     // request user permissions on mount, update the state once requested
