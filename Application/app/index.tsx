@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, ActivityIndicator, TouchableOpacity, ScrollView
 import { BleState } from 'react-native-ble-manager';
 import { SafeAreaView } from "react-native-safe-area-context";
 import Warning from "../components/warning";
-import { useGlobal } from "./GlobalContext";
+import { useGlobal } from "../providers/GlobalContext";
 
 const styles = StyleSheet.create({
     container: {

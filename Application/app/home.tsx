@@ -1,6 +1,6 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useGlobal } from "./GlobalContext";
+import { useGlobal } from "../providers/GlobalContext";
 
 const styles = StyleSheet.create({
   container: {
