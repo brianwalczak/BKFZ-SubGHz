@@ -28,14 +28,15 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
             if (scan === RESULTS.GRANTED && connect === RESULTS.GRANTED && location === RESULTS.GRANTED) {
                 setPermissions(true);
-            } else {
-                setPermissions(false);
+                return true;
             }
         } else {
             setPermissions(true); // iOS or anything else i guess
+            return true;
         }
 
-        return permissions;
+        setPermissions(false);
+        return false;
     }, []);
 
     // silently check bluetooth permissions from the user
@@ -47,18 +48,19 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
             if (scan === RESULTS.GRANTED && connect === RESULTS.GRANTED && location === RESULTS.GRANTED) {
                 setPermissions(true);
-            } else {
-                setPermissions(false);
+                return true;
             }
         } else {
             setPermissions(true); // iOS or anything else i guess
+            return true;
         }
 
-        return permissions;
+        setPermissions(false);
+        return false;
     }, []);
 
     // disconnect from currently connected device
-    const disconnectDevice = async () => {
+    const disconnectDevice = useCallback(async () => {
         if (!permissions || !btInit) return false;
         if (btConnected) {
             try {
@@ -67,10 +69,10 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         }
 
         return true;
-    };
+    }, [permissions, btInit, btConnected]);
 
     // connect to a bluetooth device by its id
-    const connectDevice = async (id: string) => {
+    const connectDevice = useCallback(async (id: string) => {
         if (!permissions || !btInit) return false;
         if (btConnected) await disconnectDevice(); // disconnect if already connected
         let timeoutId: ReturnType<typeof setTimeout>;
@@ -103,7 +105,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
             return false;
         }
-    };
+    }, [permissions, btInit, btConnected, disconnectDevice]);
 
     // request user permissions on mount, update the state once requested
     useEffect(() => {
@@ -119,7 +121,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         } else if (!btConnected && pathname !== "/") {
             router.replace("/"); // navigate to connection page
         }
-    }, [btConnected]);
+    }, [btConnected, pathname, router]);
 
     // check for permission changes every 2 seconds in case user manually changes them
     useEffect(() => {
@@ -136,7 +138,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     useEffect(() => {
         if (!permissions) return;
 
-        const initBle = async () => {
+        (async () => {
             if (!btInit) {
                 await BleManager.start({ showAlert: false });
                 setBtInit(true); // only init once
@@ -184,9 +186,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                     setBtConnected(null); // register for disconnects
                 }
             });
-        };
-
-        initBle();
+        })();
 
         return () => {
             btStateSub.current?.remove();
@@ -245,10 +245,10 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         }, 5000);
 
         return () => clearInterval(interval);
-    }, []);
+    }, []); // no devices needed since we're using setDevices latest state
 
     return (
-        <GlobalContext.Provider value={{ permissions, btState, btConnected, devices, connectDevice }}>
+        <GlobalContext.Provider value={{ permissions, btState, devices, connectDevice }}>
             {children}
         </GlobalContext.Provider>
     );
