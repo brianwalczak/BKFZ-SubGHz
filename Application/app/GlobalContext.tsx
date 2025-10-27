@@ -9,6 +9,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const [btState, setBtState] = useState<BleState | null>(null);
     const scanSub = React.useRef<EventSubscription | null>(null);
     const btStateSub = React.useRef<EventSubscription | null>(null);
+    const btConnectSub = React.useRef<EventSubscription | null>(null);
     const btDisconnectSub = React.useRef<EventSubscription | null>(null);
     const [btConnected, setBtConnected] = useState<string | null>(null);
     const [btInit, setBtInit] = useState<boolean>(false);
@@ -133,6 +134,10 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                 setBtState(args.state); // register for state updates
             });
 
+            btConnectSub.current = BleManager.onConnectPeripheral((device: any) => {
+                setBtConnected(device?.peripheral); // register for connects
+            });
+
             btDisconnectSub.current = BleManager.onDisconnectPeripheral((device: any) => {
                 if (btConnected && device?.peripheral === btConnected) {
                     setBtConnected(null); // register for disconnects
@@ -144,6 +149,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
         return () => {
             btStateSub.current?.remove();
+            btConnectSub.current?.remove();
             btDisconnectSub.current?.remove();
         };
     }, [permissions]);
