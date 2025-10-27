@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { EventSubscription, StyleSheet, Text, View, ActivityIndicator, TouchableOpacity, ScrollView } from "react-native";
 import BleManager, { BleState } from 'react-native-ble-manager';
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -50,21 +50,11 @@ const styles = StyleSheet.create({
 });
 
 export default function Index() {
-    const { permissions } = useGlobal();
-    const [btState, setBtState] = useState<BleState | null>(null);
-    const scanSub = React.useRef<EventSubscription | null>(null);
-    const stateSub = React.useRef<EventSubscription | null>(null);
-    const [devices, setDevices] = useState<any[]>([]);
+    const { permissions, btState, devices } = useGlobal();
     const [connectingId, setConnectingId] = useState<string | null>(null);
 
     const router = useRouter();
     const disconnectSub = React.useRef<EventSubscription | null>(null);
-
-    function cleanup() {
-        BleManager.stopScan();
-        scanSub.current?.remove();
-        stateSub.current?.remove();
-    }
 
     function connect(id: string) {
         if (!permissions) return;
@@ -90,7 +80,6 @@ export default function Index() {
                 });
 
                 setConnectingId(null);
-                cleanup(); // clean up before navigating
                 router.replace("/home"); // navigate to home page
             }).catch((error) => {
                 clearTimeout(timeout);
@@ -101,81 +90,6 @@ export default function Index() {
             setConnectingId(null);
         }
     }
-
-    // init bluetooth manager once permissions are granted (only once)
-    useEffect(() => {
-        if (!permissions) return;
-
-        BleManager.start({ showAlert: false }).then(() => {
-            BleManager.checkState(); // initial state check
-
-            stateSub.current = BleManager.onDidUpdateState((args: { state: BleState }) => {
-                setBtState(args.state);
-            });
-        });
-
-        return () => {
-            stateSub.current?.remove();
-        };
-    }, [permissions]);
-
-    // handle bluetooth state changes and scanning
-    useEffect(() => {
-        if (!permissions) return;
-
-        // remove any old listeners
-        if (scanSub.current) {
-            scanSub.current.remove();
-            BleManager.stopScan();
-        }
-
-        if (btState === BleState.On) {
-            // start scanning once Bluetooth is enabled
-            BleManager.scan([], 0, false).then(() => {
-                scanSub.current = BleManager.onDiscoverPeripheral((device: any) => {
-                    if (!device?.name?.includes('BKFZ')) return; // only show BKFZ devices
-
-                    setDevices(prev => {
-                        const idx = prev.findIndex(d => d.id === device.id);
-
-                        if (idx !== -1) {
-                            const updated = [...prev];
-                            updated[idx] = { ...updated[idx], ...device, lastSeen: Date.now() };
-
-                            return updated;
-                        }
-
-                        return [...prev, { ...device, lastSeen: Date.now() }];
-                    });
-                });
-            });
-        } else if (btState === BleState.Off) {
-            try {
-                BleManager.enableBluetooth().catch(() => {
-                    return;
-                });
-            } catch { };
-        }
-    }, [btState, permissions]);
-
-    // remove old devices if no longer seen
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setDevices((prev: any) => {
-                // keep only devices seen in the last 10 seconds
-                return prev.filter((dev: any) => Date.now() - dev.lastSeen < 10000);
-            });
-        }, 5000);
-
-        return () => clearInterval(interval);
-    }, []);
-
-    // Clean up listeners on unmount
-    useEffect(() => {
-        return () => {
-            cleanup();
-        };
-    }, []);
 
     return (
         <SafeAreaView style={styles.container}>
@@ -198,7 +112,7 @@ export default function Index() {
                             <Text style={{ fontFamily: "Open Sans", color: '#aaa', textAlign: 'center' }}>Searching for devices, please wait...</Text>
                         ) : (
                             <ScrollView style={{ flex: 1 }}>
-                                {devices.map((dev) => (
+                                {devices.map((dev: any) => (
                                     <View key={dev.id} style={{ padding: 15, marginBottom: 12, backgroundColor: '#111', borderRadius: 6, flexDirection: 'row', alignItems: 'center' }}>
                                         <View style={{ flex: 1 }}>
                                             <Text style={{ fontFamily: "Open Sans", fontWeight: "bold", color: 'white' }}>{dev.name || 'Unknown Device'}</Text>

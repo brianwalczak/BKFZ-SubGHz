@@ -1,10 +1,17 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { Platform } from "react-native";
+import { EventSubscription, Platform } from "react-native";
 import { request, check, PERMISSIONS, RESULTS } from "react-native-permissions";
+import BleManager, { BleState } from 'react-native-ble-manager';
 const GlobalContext = createContext<any>(undefined);
 
 export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [permissions, setPermissions] = useState(false);
+    const [btState, setBtState] = useState<BleState | null>(null);
+    const scanSub = React.useRef<EventSubscription | null>(null);
+    const btStateSub = React.useRef<EventSubscription | null>(null);
+    const [btConnected, setBtConnected] = useState(null);
+    const [btInit, setBtInit] = useState(false);
+    const [devices, setDevices] = useState<any[]>([]);
 
     const requestPermissions = useCallback(async () => {
         if (Platform.OS === "android") {
@@ -60,8 +67,82 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         return () => clearInterval(interval);
     }, [permissions, checkPermissions]);
 
+    // init bluetooth manager once permissions are granted (only once)
+    useEffect(() => {
+        if (!permissions) return;
+
+        const initBle = async () => {
+            if (!btInit) {
+                await BleManager.start({ showAlert: false });
+                setBtInit(true); // only init once
+            }
+
+            BleManager.checkState(); // initial state check
+            btStateSub.current = BleManager.onDidUpdateState((args: { state: BleState }) => {
+                setBtState(args.state); // register for state updates
+            });
+        };
+
+        initBle();
+
+        return () => {
+            btStateSub.current?.remove();
+        };
+    }, [permissions]);
+
+    // handle bluetooth state changes and scanning
+    useEffect(() => {
+        if (!permissions || btConnected) return; // no need to scan if connected
+
+        // remove any old listeners
+        if (scanSub.current) {
+            scanSub.current.remove();
+            BleManager.stopScan();
+        }
+
+        if (btState === BleState.On) {
+            // start scanning once Bluetooth is enabled
+            BleManager.scan([], 0, false).then(() => {
+                scanSub.current = BleManager.onDiscoverPeripheral((device: any) => {
+                    if (!device?.name?.includes('BKFZ')) return; // only show BKFZ devices
+
+                    setDevices(prev => {
+                        const idx = prev.findIndex(d => d.id === device.id);
+
+                        if (idx !== -1) {
+                            const updated = [...prev];
+                            updated[idx] = { ...updated[idx], ...device, lastSeen: Date.now() };
+
+                            return updated;
+                        }
+
+                        return [...prev, { ...device, lastSeen: Date.now() }];
+                    });
+                });
+            });
+        } else if (btState === BleState.Off) {
+            try {
+                BleManager.enableBluetooth().catch(() => {
+                    return;
+                });
+            } catch { };
+        }
+    }, [btState, permissions, btConnected]);
+
+    // remove old devices if no longer seen
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setDevices((prev: any) => {
+                // keep only devices seen in the last 10 seconds
+                return prev.filter((dev: any) => Date.now() - dev.lastSeen < 10000);
+            });
+        }, 5000);
+
+        return () => clearInterval(interval);
+    }, []);
+
     return (
-        <GlobalContext.Provider value={{ permissions, requestPermissions }}>
+        <GlobalContext.Provider value={{ permissions, btState, btConnected, devices }}>
             {children}
         </GlobalContext.Provider>
     );
