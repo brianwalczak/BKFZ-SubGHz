@@ -8,13 +8,14 @@ const GlobalContext = createContext<any>(undefined);
 export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [permissions, setPermissions] = useState<boolean>(false);
     const [btState, setBtState] = useState<BleState | null>(null);
+    const [btConnected, setBtConnected] = useState<string | null>(null);
+    const [btInit, setBtInit] = useState<boolean>(false);
+    const [devices, setDevices] = useState<any[]>([]);
+
     const scanSub = React.useRef<EventSubscription | null>(null);
     const btStateSub = React.useRef<EventSubscription | null>(null);
     const btConnectSub = React.useRef<EventSubscription | null>(null);
     const btDisconnectSub = React.useRef<EventSubscription | null>(null);
-    const [btConnected, setBtConnected] = useState<string | null>(null);
-    const [btInit, setBtInit] = useState<boolean>(false);
-    const [devices, setDevices] = useState<any[]>([]);
     const router = useRouter();
     const pathname = usePathname();
 
@@ -144,7 +145,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                 try {
                     const connected = await BleManager.getConnectedPeripherals([]);
                     const isDevice = connected.find((device: any) => (device?.name || device?.advertising?.localName || null)?.includes('BKFZ'));
-                    
+
                     if (isDevice && !btConnected) {
                         setBtConnected(isDevice.id); // set initial connected device
                     }
