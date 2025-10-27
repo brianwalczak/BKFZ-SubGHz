@@ -4,6 +4,7 @@ import { request, PERMISSIONS, RESULTS } from "react-native-permissions";
 import BleManager, { BleState } from 'react-native-ble-manager';
 import { SafeAreaView } from "react-native-safe-area-context";
 import Warning from "../components/warning";
+import { useRouter } from "expo-router";
 
 const styles = StyleSheet.create({
     container: {
@@ -56,6 +57,15 @@ export default function Index() {
     const [devices, setDevices] = useState<any[]>([]);
     const [connectingId, setConnectingId] = useState<string | null>(null);
 
+    const router = useRouter();
+    const disconnectSub = React.useRef<EventSubscription | null>(null);
+
+    function cleanup() {
+        BleManager.stopScan();
+        scanSub.current?.remove();
+        stateSub.current?.remove();
+    }
+
     function connect(id: string) {
         if (!permissions) return;
         setConnectingId(id);
@@ -72,12 +82,18 @@ export default function Index() {
             BleManager.connect(id).then(() => {
                 clearTimeout(timeout);
 
-                console.log("Connected to", id);
+                if (disconnectSub.current) disconnectSub.current?.remove();
+                disconnectSub.current = BleManager.onDisconnectPeripheral((device: any) => {
+                    if (device?.peripheral === id) {
+                        router.replace("/");
+                    }
+                });
+
                 setConnectingId(null);
+                cleanup(); // clean up before navigating
+                router.replace("/home"); // navigate to home page
             }).catch((error) => {
                 clearTimeout(timeout);
-
-                console.log("Connection error:", error);
                 setConnectingId(null);
             });
         } catch {
@@ -173,6 +189,13 @@ export default function Index() {
         }, 5000);
 
         return () => clearInterval(interval);
+    }, []);
+
+    // Clean up listeners on unmount
+    useEffect(() => {
+        return () => {
+            cleanup();
+        };
     }, []);
 
     return (
