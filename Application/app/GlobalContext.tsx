@@ -126,6 +126,19 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             if (!btInit) {
                 await BleManager.start({ showAlert: false });
                 setBtInit(true); // only init once
+
+                // check if user is already connected to a device
+                try {
+                    const connected = await BleManager.getConnectedPeripherals([]);
+                    const device = connected.find((dev: any) => (dev?.name || dev?.advertising?.localName || null)?.includes('BKFZ'));
+                    if (device && !btConnected) {
+                        setBtConnected(device.id); // set initial connected device
+
+                        if (pathname === "/") {
+                            router.replace("/home");
+                        }
+                    }
+                } catch { };
             }
 
             BleManager.checkState(); // initial state check
@@ -134,11 +147,28 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                 setBtState(args.state); // register for state updates
             });
 
-            btConnectSub.current = BleManager.onConnectPeripheral((device: any) => {
-                setBtConnected(device?.peripheral); // register for connects
+            btConnectSub.current = BleManager.onConnectPeripheral(async (device: any) => {
+                if (!btConnected) {
+                    // try to find the device name for validation
+                    let deviceName = null;
 
-                if (pathname === "/") {
-                    router.replace("/home");
+                    const found = devices.find(d => d.id === device?.peripheral);
+                    if (found) {
+                        deviceName = found.name;
+                    } else {
+                        try {
+                            const details = await BleManager.retrieveServices(device?.peripheral);
+                            deviceName = details?.name || details?.advertising?.localName || null;
+                        } catch { };
+                    }
+
+                    if (deviceName && deviceName.includes('BKFZ')) {
+                    setBtConnected(device?.peripheral); // register for connects
+
+                        if (pathname === "/") {
+                            router.replace("/home");
+                        }
+                    }
                 }
             });
 
@@ -176,19 +206,20 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             // start scanning once Bluetooth is enabled
             BleManager.scan([], 0, false).then(() => {
                 scanSub.current = BleManager.onDiscoverPeripheral((device: any) => {
-                    if (!device?.name?.includes('BKFZ')) return; // only show BKFZ devices
+                    const data = { name: (device?.name || device?.advertising?.localName || null), id: device?.id };
+                    if (!data.name?.includes('BKFZ')) return; // only show BKFZ devices
 
                     setDevices(prev => {
-                        const idx = prev.findIndex(d => d.id === device.id);
+                        const idx = prev.findIndex(d => d.id === data.id);
 
                         if (idx !== -1) {
                             const updated = [...prev];
-                            updated[idx] = { ...updated[idx], ...device, lastSeen: Date.now() };
+                            updated[idx] = { ...updated[idx], ...data, lastSeen: Date.now() };
 
                             return updated;
                         }
 
-                        return [...prev, { ...device, lastSeen: Date.now() }];
+                        return [...prev, { ...data, lastSeen: Date.now() }];
                     });
                 });
             });
