@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { EventSubscription, StyleSheet, Text, View, Platform, ActivityIndicator, TouchableOpacity, ScrollView } from "react-native";
-import { request, PERMISSIONS, RESULTS } from "react-native-permissions";
+import { EventSubscription, StyleSheet, Text, View, ActivityIndicator, TouchableOpacity, ScrollView } from "react-native";
 import BleManager, { BleState } from 'react-native-ble-manager';
 import { SafeAreaView } from "react-native-safe-area-context";
 import Warning from "../components/warning";
+import { useGlobal } from "./GlobalContext";
 import { useRouter } from "expo-router";
 
 const styles = StyleSheet.create({
@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
 });
 
 export default function Index() {
-    const [permissions, setPermissions] = useState(false);
+    const { permissions } = useGlobal();
     const [btState, setBtState] = useState<BleState | null>(null);
     const scanSub = React.useRef<EventSubscription | null>(null);
     const stateSub = React.useRef<EventSubscription | null>(null);
@@ -101,27 +101,6 @@ export default function Index() {
             setConnectingId(null);
         }
     }
-
-    // request user permissions on mount, update the state once requested
-    useEffect(() => {
-        async function requestPermissions() {
-            if (Platform.OS === "android") {
-                const scan = await request(PERMISSIONS.ANDROID.BLUETOOTH_SCAN);
-                const connect = await request(PERMISSIONS.ANDROID.BLUETOOTH_CONNECT);
-                const location = await request(PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION);
-
-                if (scan === RESULTS.GRANTED && connect === RESULTS.GRANTED && location === RESULTS.GRANTED) {
-                    setPermissions(true);
-                } else {
-                    setPermissions(false);
-                }
-            } else {
-                setPermissions(true); // iOS or anything else i guess
-            }
-        }
-
-        requestPermissions();
-    }, []);
 
     // init bluetooth manager once permissions are granted (only once)
     useEffect(() => {

@@ -2,6 +2,7 @@ import * as Font from "expo-font";
 import { Stack } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
+import { GlobalProvider } from "./GlobalContext";
 
 export default function RootLayout() {
   const [loaded, setLoaded] = useState(false);
@@ -24,7 +25,7 @@ export default function RootLayout() {
     );
   }
 
-  return <Stack screenOptions={{
+  return <GlobalProvider><Stack screenOptions={{
     headerShown: false
-  }} />;
+  }} /></GlobalProvider>;
 }
