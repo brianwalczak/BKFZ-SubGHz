@@ -4,6 +4,7 @@ import { request, check, PERMISSIONS, RESULTS } from "react-native-permissions";
 import BleManager, { BleState } from 'react-native-ble-manager';
 import { usePathname, useRouter } from "expo-router";
 const GlobalContext = createContext<any>(undefined);
+const nameFilter = "BKFZ";
 
 export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [permissions, setPermissions] = useState<boolean>(false);
@@ -153,7 +154,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                 // check if user is already connected to a device
                 try {
                     const connected = await BleManager.getConnectedPeripherals([]);
-                    const isDevice = connected.find((device: any) => (device?.name || device?.advertising?.localName || null)?.includes('BKFZ'));
+                    const isDevice = connected.find((device: any) => (device?.name || device?.advertising?.localName || null)?.includes(nameFilter));
 
                     if (isDevice && !btConnected) {
                         setBtConnected(isDevice.id); // set initial connected device
@@ -182,7 +183,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                         } catch { };
                     }
 
-                    if (deviceName && deviceName.includes('BKFZ')) {
+                    if (deviceName && deviceName.includes(nameFilter)) {
                         setBtConnected(device?.peripheral); // register for connects
                     }
                 }
@@ -211,7 +212,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             BleManager.scan([], 0, false).then(() => {
                 scanSub.current = BleManager.onDiscoverPeripheral((device: any) => {
                     const data = { name: (device?.name || device?.advertising?.localName || null), id: device?.id };
-                    if (!data.name?.includes('BKFZ')) return; // only show BKFZ devices
+                    if (!data.name?.includes(nameFilter)) return; // only show BKFZ devices
 
                     setDevices(prev => {
                         const idx = prev.findIndex(d => d.id === data.id);

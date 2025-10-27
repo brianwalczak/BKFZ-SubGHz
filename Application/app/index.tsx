@@ -87,7 +87,10 @@ export default function Index() {
                                             <Text style={{ fontFamily: "Open Sans", fontWeight: "bold", color: 'white' }}>{dev.name || 'Unknown Device'}</Text>
                                             <Text style={{ fontFamily: "Open Sans", color: '#888', fontSize: 12 }}>{dev.id || '----------------'}</Text>
                                         </View>
-                                        <TouchableOpacity style={styles.button} onPress={() => connect(dev.id)} activeOpacity={0.8} disabled={connectingId !== null}>
+                                        <TouchableOpacity style={[
+                                            styles.button,
+                                            connectingId === dev.id && { opacity: 0.5 } // gray out when disabled
+                                        ]} onPress={() => connect(dev.id)} activeOpacity={0.8} disabled={connectingId !== null}>
                                             <Text style={styles.buttonText}>{connectingId === dev.id ? 'Connecting...' : 'Connect'}</Text>
                                         </TouchableOpacity>
                                     </View>
