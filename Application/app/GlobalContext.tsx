@@ -130,9 +130,10 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                 // check if user is already connected to a device
                 try {
                     const connected = await BleManager.getConnectedPeripherals([]);
-                    const device = connected.find((dev: any) => (dev?.name || dev?.advertising?.localName || null)?.includes('BKFZ'));
-                    if (device && !btConnected) {
-                        setBtConnected(device.id); // set initial connected device
+                    const isDevice = connected.find((device: any) => (device?.name || device?.advertising?.localName || null)?.includes('BKFZ'));
+                    
+                    if (isDevice && !btConnected) {
+                        setBtConnected(isDevice.id); // set initial connected device
 
                         if (pathname === "/") {
                             router.replace("/home");
@@ -158,7 +159,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                     } else {
                         try {
                             const details = await BleManager.retrieveServices(device?.peripheral);
-                            deviceName = details?.name || details?.advertising?.localName || null;
+                            deviceName = (details?.name || details?.advertising?.localName || null);
                         } catch { };
                     }
 
