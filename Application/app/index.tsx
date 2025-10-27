@@ -50,44 +50,19 @@ const styles = StyleSheet.create({
 });
 
 export default function Index() {
-    const { permissions, btState, devices } = useGlobal();
+    const { permissions, btState, devices, connectDevice } = useGlobal();
     const [connectingId, setConnectingId] = useState<string | null>(null);
-
     const router = useRouter();
-    const disconnectSub = React.useRef<EventSubscription | null>(null);
 
-    function connect(id: string) {
+    async function connect(id: string) {
         if (!permissions) return;
         setConnectingId(id);
 
-        const timeout = setTimeout(() => {
-            try {
-                BleManager.disconnect(id);
-            } catch { };
+        const success = await connectDevice(id);
+        setConnectingId(null);
 
-            setConnectingId(null);
-        }, 10000);
-
-        try {
-            BleManager.connect(id).then(() => {
-                clearTimeout(timeout);
-
-                if (disconnectSub.current) disconnectSub.current?.remove();
-                disconnectSub.current = BleManager.onDisconnectPeripheral((device: any) => {
-                    if (device?.peripheral === id) {
-                        router.replace("/");
-                    }
-                });
-
-                setConnectingId(null);
-                router.replace("/home"); // navigate to home page
-            }).catch((error) => {
-                clearTimeout(timeout);
-                setConnectingId(null);
-            });
-        } catch {
-            clearTimeout(timeout);
-            setConnectingId(null);
+        if (success) {
+            router.replace("/home"); // navigate to home page
         }
     }
 
