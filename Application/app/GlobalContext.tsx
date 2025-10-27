@@ -258,7 +258,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }, []); // no devices needed since we're using setDevices latest state
 
     return (
-        <GlobalContext.Provider value={{ permissions, btState, devices, connectDevice }}>
+        <GlobalContext.Provider value={{ permissions, btState, devices, connectDevice, disconnectDevice }}>
             {children}
         </GlobalContext.Provider>
     );
