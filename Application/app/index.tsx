@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { EventSubscription, StyleSheet, Text, View, Platform } from "react-native";
+import { EventSubscription, StyleSheet, Text, View, Platform, ActivityIndicator, TouchableOpacity, ScrollView } from "react-native";
 import { request, PERMISSIONS, RESULTS } from "react-native-permissions";
 import BleManager, { BleState } from 'react-native-ble-manager';
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -9,7 +9,8 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#000",
-        alignItems: "center"
+        alignItems: "center",
+        width: "100%"
     },
     title: {
         fontFamily: "Open Sans",
@@ -28,7 +29,22 @@ const styles = StyleSheet.create({
     content: {
         flex: 1,
         margin: 24,
-        padding: 16
+        padding: 16,
+        paddingHorizontal: 30,
+        width: '100%'
+    },
+    button: {
+        backgroundColor: "#3B82F6",
+        paddingVertical: 8,
+        paddingHorizontal: 14,
+        borderRadius: 100
+    },
+    buttonText: {
+        color: 'white',
+        fontFamily: 'Open Sans',
+        fontSize: 14,
+        fontWeight: 'bold',
+        textAlign: 'center'
     }
 });
 
@@ -90,8 +106,19 @@ export default function Index() {
         if (btState === BleState.On) {
             // start scanning once Bluetooth is enabled
             BleManager.scan([], 0, false).then(() => {
-                scanSub.current = BleManager.onDiscoverPeripheral((args: { device: any }) => {
-                    setDevices(prev => ([...prev, { ...args.device, lastSeen: Date.now() }]));
+                scanSub.current = BleManager.onDiscoverPeripheral((device: any) => {
+                    setDevices(prev => {
+                        const idx = prev.findIndex(d => d.id === device.id);
+
+                        if (idx !== -1) {
+                            const updated = [...prev];
+                            updated[idx] = { ...updated[idx], ...device, lastSeen: Date.now() };
+
+                            return updated;
+                        }
+
+                        return [...prev, { ...device, lastSeen: Date.now() }];
+                    });
                 });
             });
         } else if (btState === BleState.Off) {
@@ -126,10 +153,29 @@ export default function Index() {
                 {permissions && (btState !== null && btState !== BleState.On) && <Warning icon="bluetooth-disabled" reason="ble-disabled" />}
 
                 {permissions && (btState === BleState.On) && (
-                    <View style={{ marginTop: 20 }}>
-                        <Text style={{ color: 'white', fontFamily: 'Open Sans', textAlign: 'center' }}>
-                            Bluetooth is enabled! You can now scan and connect to devices. :D
-                        </Text>
+                    <View style={{ marginTop: 20, width: '100%', flex: 1 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 28 }}>
+                            <Text style={{ fontFamily: "Open Sans", color: 'white', fontWeight: 'bold', marginRight: 8 }}>Searching</Text>
+                            <ActivityIndicator size="small" color="#aaa" />
+                        </View>
+
+                        {devices.length === 0 ? (
+                            <Text style={{ fontFamily: "Open Sans", color: '#aaa', textAlign: 'center' }}>Searching for devices, please wait...</Text>
+                        ) : (
+                            <ScrollView style={{ flex: 1 }}>
+                                {devices.map((dev) => (
+                                    <View key={dev.id} style={{ padding: 15, marginBottom: 12, backgroundColor: '#111', borderRadius: 6, flexDirection: 'row', alignItems: 'center' }}>
+                                        <View style={{ flex: 1 }}>
+                                            <Text style={{ fontFamily: "Open Sans", fontWeight: "bold", color: 'white' }}>{dev.name || 'Unknown Device'}</Text>
+                                            <Text style={{ fontFamily: "Open Sans", color: '#888', fontSize: 12 }}>{dev.id || '----------------'}</Text>
+                                        </View>
+                                        <TouchableOpacity style={styles.button} onPress={() => { }} activeOpacity={0.8}>
+                                            <Text style={styles.buttonText}>Connect</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                ))}
+                            </ScrollView>
+                        )}
                     </View>
                 )}
             </View>
