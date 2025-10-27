@@ -18,6 +18,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const router = useRouter();
     const pathname = usePathname();
 
+    // request bluetooth permissions from the user
     const requestPermissions = useCallback(async () => {
         if (Platform.OS === "android") {
             const scan = await request(PERMISSIONS.ANDROID.BLUETOOTH_SCAN);
@@ -36,6 +37,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         return permissions;
     }, []);
 
+    // silently check bluetooth permissions from the user
     const checkPermissions = useCallback(async () => {
         if (Platform.OS === "android") {
             const scan = await check(PERMISSIONS.ANDROID.BLUETOOTH_SCAN);
@@ -54,6 +56,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         return permissions;
     }, []);
 
+    // disconnect from currently connected device
     const disconnectDevice = async () => {
         if (!permissions || !btInit) return false;
         if (btConnected) {
@@ -65,9 +68,10 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         return true;
     };
 
+    // connect to a bluetooth device by its id
     const connectDevice = async (id: string) => {
         if (!permissions || !btInit) return false;
-        if (btConnected) await disconnectDevice();
+        if (btConnected) await disconnectDevice(); // disconnect if already connected
         let timeoutId: ReturnType<typeof setTimeout>;
 
         try {
@@ -107,6 +111,15 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         requestPermissions();
     }, [requestPermissions]);
 
+    // navigate through pages based on bluetooth connection state
+    useEffect(() => {
+        if (btConnected && pathname === "/") {
+            router.replace("/home"); // navigate to home page
+        } else if (!btConnected && pathname !== "/") {
+            router.replace("/"); // navigate to connection page
+        }
+    }, [btConnected]);
+
     // check for permission changes every 2 seconds in case user manually changes them
     useEffect(() => {
         if (permissions) return; // no polling if already granted
@@ -134,10 +147,6 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                     
                     if (isDevice && !btConnected) {
                         setBtConnected(isDevice.id); // set initial connected device
-
-                        if (pathname === "/") {
-                            router.replace("/home");
-                        }
                     }
                 } catch { };
             }
@@ -164,11 +173,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                     }
 
                     if (deviceName && deviceName.includes('BKFZ')) {
-                    setBtConnected(device?.peripheral); // register for connects
-
-                        if (pathname === "/") {
-                            router.replace("/home");
-                        }
+                        setBtConnected(device?.peripheral); // register for connects
                     }
                 }
             });
@@ -176,10 +181,6 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             btDisconnectSub.current = BleManager.onDisconnectPeripheral((device: any) => {
                 if (btConnected && device?.peripheral === btConnected) {
                     setBtConnected(null); // register for disconnects
-
-                    if (pathname !== "/") {
-                        router.replace("/");
-                    }
                 }
             });
         };
