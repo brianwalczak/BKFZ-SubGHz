@@ -54,6 +54,24 @@ export default function Index() {
     const scanSub = React.useRef<EventSubscription | null>(null);
     const stateSub = React.useRef<EventSubscription | null>(null);
     const [devices, setDevices] = useState<any[]>([]);
+    const [connectingId, setConnectingId] = useState<string | null>(null);
+
+    function connect(id: string) {
+        if (!permissions) return;
+        setConnectingId(id);
+
+        try {
+            BleManager.connect(id).then(() => {
+                console.log("Connected to", id);
+                setConnectingId(null);
+            }).catch((error) => {
+                console.log("Connection error:", error);
+                setConnectingId(null);
+            });
+        } catch {
+            setConnectingId(null);
+        };
+    }
 
     // request user permissions on mount, update the state once requested
     useEffect(() => {
@@ -169,8 +187,8 @@ export default function Index() {
                                             <Text style={{ fontFamily: "Open Sans", fontWeight: "bold", color: 'white' }}>{dev.name || 'Unknown Device'}</Text>
                                             <Text style={{ fontFamily: "Open Sans", color: '#888', fontSize: 12 }}>{dev.id || '----------------'}</Text>
                                         </View>
-                                        <TouchableOpacity style={styles.button} onPress={() => { }} activeOpacity={0.8}>
-                                            <Text style={styles.buttonText}>Connect</Text>
+                                        <TouchableOpacity style={styles.button} onPress={() => connect(dev.id)} activeOpacity={0.8} disabled={connectingId !== null}>
+                                            <Text style={styles.buttonText}>{connectingId === dev.id ? 'Connecting...' : 'Connect'}</Text>
                                         </TouchableOpacity>
                                     </View>
                                 ))}
