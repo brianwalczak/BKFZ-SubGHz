@@ -57,8 +57,6 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             try {
                 await BleManager.disconnect(btConnected);
             } catch { };
-
-            setBtConnected(null);
         }
 
         return true;
@@ -72,7 +70,6 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         try {
             const connect = BleManager.connect(id).then(() => {
                 clearTimeout(timeoutId);
-                setBtConnected(id);
                 return true;
             }).catch(() => {
                 clearTimeout(timeoutId);
