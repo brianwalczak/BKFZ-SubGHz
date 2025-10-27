@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { EventSubscription, StyleSheet, Text, View, ActivityIndicator, TouchableOpacity, ScrollView } from "react-native";
-import BleManager, { BleState } from 'react-native-ble-manager';
+import { StyleSheet, Text, View, ActivityIndicator, TouchableOpacity, ScrollView } from "react-native";
+import { BleState } from 'react-native-ble-manager';
 import { SafeAreaView } from "react-native-safe-area-context";
 import Warning from "../components/warning";
 import { useGlobal } from "./GlobalContext";
@@ -58,12 +58,8 @@ export default function Index() {
         if (!permissions) return;
         setConnectingId(id);
 
-        const success = await connectDevice(id);
+        await connectDevice(id);
         setConnectingId(null);
-
-        if (success) {
-            router.replace("/home"); // navigate to home page
-        }
     }
 
     return (

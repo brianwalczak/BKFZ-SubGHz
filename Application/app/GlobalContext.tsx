@@ -51,6 +51,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }, []);
 
     const disconnectDevice = async () => {
+        if (!permissions) return false;
         if (btConnected) {
             try {
                 await BleManager.disconnect(btConnected);
@@ -63,6 +64,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     };
 
     const connectDevice = async (id: string) => {
+        if (!permissions) return false;
         if (btConnected) await disconnectDevice();
         let timeoutId: ReturnType<typeof setTimeout>;
 
