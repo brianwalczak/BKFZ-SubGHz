@@ -138,6 +138,8 @@ export default function Index() {
             // start scanning once Bluetooth is enabled
             BleManager.scan([], 0, false).then(() => {
                 scanSub.current = BleManager.onDiscoverPeripheral((device: any) => {
+                    if (!device?.name?.includes('BKFZ')) return; // only show BKFZ devices
+
                     setDevices(prev => {
                         const idx = prev.findIndex(d => d.id === device.id);
 
