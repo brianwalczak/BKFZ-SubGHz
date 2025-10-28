@@ -12,4 +12,8 @@ void registerSettings(std::function<void(const String&, int, int)> handler);
 void sendData(const String &data);
 void setupDevice();
 
+/* shared from main ino to interfaces */
+void flushSamples();
+void playSignal(const int *samples, int length);
+
 #endif

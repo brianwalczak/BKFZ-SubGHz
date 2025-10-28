@@ -10,29 +10,8 @@
 #include <headers/user_settings.h> // default user settings and their options
 
 #if CONNECTION_MODE == CONNECTION_MODE_WIFI
-  std::function<void(std::function<void(bool)>)> playRequestHandler = nullptr;
-  std::function<void(const std::vector<int>&, int, const String&, const String&)> playHandler = nullptr;
-  std::function<void(const String&, int, int)> settingsHandler = nullptr;
-  std::function<void()> analyzerHandler = nullptr;
-
   AsyncWebServer server(SERVER_PORT);
   AsyncWebSocket ws("/ws");
-
-  void registerPlayRequest(std::function<void(std::function<void(bool)>)> handler) {
-    playRequestHandler = handler;
-  }
-
-  void registerPlay(std::function<void(const std::vector<int>&, int, const String&, const String&)> handler) {
-    playHandler = handler;
-  }
-
-  void registerAnalyzer(std::function<void()> handler) {
-    analyzerHandler = handler;
-  }
-
-  void registerSettings(std::function<void(const String&, int, int)> handler) {
-    settingsHandler = handler;
-  }
 
   void sendData(const String &data) {
     if (ws.count() > 0) {
@@ -193,8 +172,8 @@
       File file = SPIFFS.open("/frequency_analyzer.html", "r");
       String content = file.readString();
 
-      if (analyzerHandler) {
-        analyzerHandler();
+      if (status.detect == "IDLE") {
+        status.detect = "QUEUED";
       }
 
       file.close();
@@ -210,42 +189,46 @@
     });
 
     server.on("/api/play", HTTP_POST, [](AsyncWebServerRequest *request) {
-      if (!playRequestHandler || !playHandler) {
-        request->send(500, "text/plain", "It looks like your BKFZ SubGHz is still initializing, please try again shortly.");
-        return;
-      }
-
       if (!(request->hasParam("samples", true) && request->hasParam("frequency", true) && request->hasParam("length", true) && request->hasParam("preset", true))) {
         request->send(400, "text/plain", "The required parameters were not provided.");
         return;
       }
 
-      playRequestHandler([request](bool approved) {
-        if (!approved) {
-          request->send(403, "text/plain", "Recording request rejected by controller");
-          return;
-        }
+      flushSamples(); // free up memory
+      
+      String samplesParam = request->getParam("samples", true)->value();
+      String frequencyParam = request->getParam("frequency", true)->value();
+      String lengthParam = request->getParam("length", true)->value();
+      String presetParam = request->getParam("preset", true)->value();
+      int reqLength = lengthParam.toInt();
+      std::vector<int> reqSamples(reqLength);
 
-        String samplesParam = request->getParam("samples", true)->value();
-        String frequencyParam = request->getParam("frequency", true)->value();
-        String lengthParam = request->getParam("length", true)->value();
-        String presetParam = request->getParam("preset", true)->value();
-        int reqLength = lengthParam.toInt();
-        std::vector<int> reqSamples(reqLength);
+      // Reconstruct samples array from response
+      DynamicJsonDocument doc(MAX_SAMPLES + 1024);
+      deserializeJson(doc, samplesParam);
+      JsonArray array = doc.as<JsonArray>();
 
-        // Reconstruct samples array from response
-        DynamicJsonDocument doc(MAX_SAMPLES + 1024);
-        deserializeJson(doc, samplesParam);
-        JsonArray array = doc.as<JsonArray>();
+      for (int i = 0; i < reqLength && i < array.size(); i++) {
+        reqSamples[i] = array[i].as<int>();
+      }
 
-        for (int i = 0; i < reqLength && i < array.size(); i++) {
-          reqSamples[i] = array[i].as<int>();
-        }
+      request->send(200, "text/plain", "Recording has been placed in queue.");
 
-        // Send back the data once destructured
-        playHandler(reqSamples, reqLength, frequencyParam, presetParam);
-        request->send(200, "text/plain", "Recording has been placed in queue.");
-      });
+      // Store old settings to revert when done
+      String old_preset = settings.preset;
+      int old_freq = settings.frequency;
+
+      // Update settings to new data
+      settings.preset = presetParam;
+      settings.frequency = frequencyParam.toInt();
+      Serial.println(F("Now playing file requested by user, successfully updated to file settings."));
+
+      playSignal(reqSamples.data(), reqLength);
+
+      Serial.println(F("Successfully played file requested, reverting back to old settings."));
+      // Revert settings back to original
+      settings.preset = old_preset;
+      settings.frequency = old_freq;
     });
 
     server.on("/api/settings", HTTP_POST, [](AsyncWebServerRequest *request) {
@@ -256,10 +239,11 @@
         int frequency = frequencyParam.toInt();
         int rssi = rssiParam.toInt();
 
-        if (settingsHandler) {
-          settingsHandler(preset, frequency, rssi);
-        }
+        settings.preset = preset;
+        settings.frequency = frequency;
+        settings.rssi = rssi;
 
+        saveSettings(); // Save settings in non-volatile storage
         request->redirect("/settings?success=true");
       } else {
         request->redirect("/settings?success=false");

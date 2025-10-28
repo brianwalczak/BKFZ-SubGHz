@@ -327,47 +327,6 @@ void setup() {
   settings.detect_rssi = preferences.getInt("detect_rssi", settings.detect_rssi);
   preferences.end();
 
-  // Register analyzer callback to handle queued requests
-  registerAnalyzer([]() {
-    if (status.detect == "IDLE") {
-      status.detect = "QUEUED";
-    }
-  });
-
-  // Register play request callbacks to handle play requests
-  registerPlayRequest([](std::function<void(bool)> respond) {
-    flushSamples(); // free up memory
-    respond(true);
-  });
-
-  // Register play callback to handle play requests
-  registerPlay([](const std::vector<int>& samples, int length, const String& freq, const String& preset) {
-    // Store old settings to revert when done
-    String old_preset = settings.preset;
-    int old_freq = settings.frequency;
-
-    // Update settings to new data
-    settings.preset = preset;
-    settings.frequency = freq.toInt();
-    Serial.println(F("Now playing file requested by user, successfully updated to file settings."));
-
-    playSignal(samples.data(), length);
-
-    Serial.println(F("Successfully played file requested, reverting back to old settings."));
-    // Revert settings back to original
-    settings.preset = old_preset;
-    settings.frequency = old_freq;
-  });
-
-  // Register settings callback to handle updating user settings
-  registerSettings([](const String& preset, int frequency, int rssi) {
-    settings.preset = preset;
-    settings.frequency = frequency;
-    settings.rssi = rssi;
-
-    saveSettings(); // Save settings in non-volatile storage
-  });
-
   setupDevice();
   setupCC1101(false);
 }
