@@ -107,6 +107,18 @@ String statusToJson() {
   return jsonString;
 }
 
+// Loads the saved settings/configurations from non-volatile storage
+void loadSettings() {
+  preferences.begin("settings", false);
+
+  settings.preset = preferences.getString("preset", settings.preset);
+  settings.frequency = preferences.getInt("frequency", settings.frequency);
+  settings.rssi = preferences.getInt("rssi", settings.rssi);
+  settings.detect_rssi = preferences.getInt("detect_rssi", settings.detect_rssi);
+  
+  preferences.end();
+}
+
 // Saves the current settings/configurations as non-volatile storage
 void saveSettings() {
   preferences.begin("settings", false); // Open Preferences storage w/ settings

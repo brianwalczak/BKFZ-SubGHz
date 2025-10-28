@@ -320,13 +320,7 @@ void setup() {
   delay(500);
   while (!Serial) { ; }
 
-  preferences.begin("settings", false);
-  settings.preset = preferences.getString("preset", settings.preset);
-  settings.frequency = preferences.getInt("frequency", settings.frequency);
-  settings.rssi = preferences.getInt("rssi", settings.rssi);
-  settings.detect_rssi = preferences.getInt("detect_rssi", settings.detect_rssi);
-  preferences.end();
-
+  loadSettings();
   setupDevice();
   setupCC1101(false);
 }

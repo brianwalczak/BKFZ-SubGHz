@@ -43,5 +43,6 @@ String settingsToJson();
 String settingsOptionsToJson();
 String statusToJson();
 void saveSettings();
+void loadSettings();
 
 #endif
