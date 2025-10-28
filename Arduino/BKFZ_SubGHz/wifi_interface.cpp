@@ -3,7 +3,7 @@
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
 #include <AsyncTCP.h>
-#include <SPIFFS.h>
+#include <LittleFS.h>
 #include <ArduinoJson.h>
 
 #include <headers/config.h> // used to configure basic variables (such as pinout, max samples, etc.)
@@ -136,15 +136,15 @@
     WiFi.softAP(ssid, password);
     IPAddress IP = WiFi.softAPIP();
 
-    if (!SPIFFS.begin(true)) {
-      Serial.println(F("An error has occurred while mounting SPIFFS. Please check if SPIFFS is properly installed."));
+    if (!LittleFS.begin(true)) {
+      Serial.println(F("An error has occurred while mounting LittleFS. Please check if LittleFS is properly installed."));
       return;
     }
 
-    server.serveStatic("/assets", SPIFFS, "/assets");
+    server.serveStatic("/assets", LittleFS, "/assets");
 
     server.on("/", HTTP_GET, [] (AsyncWebServerRequest *request) {
-      File file = SPIFFS.open("/home.html", "r");
+      File file = LittleFS.open("/home.html", "r");
       String content = file.readString();
 
       file.close();
@@ -152,7 +152,7 @@
     });
 
     server.on("/record", HTTP_GET, [] (AsyncWebServerRequest *request) {
-      File file = SPIFFS.open("/record.html", "r");
+      File file = LittleFS.open("/record.html", "r");
       String content = file.readString();
 
       file.close();
@@ -160,7 +160,7 @@
     });
 
     server.on("/play", HTTP_GET, [] (AsyncWebServerRequest *request) {
-      File file = SPIFFS.open("/play.html", "r");
+      File file = LittleFS.open("/play.html", "r");
       String content = file.readString();
 
       file.close();
@@ -168,7 +168,7 @@
     });
 
     server.on("/analyzer", HTTP_GET, [] (AsyncWebServerRequest *request) {
-      File file = SPIFFS.open("/frequency_analyzer.html", "r");
+      File file = LittleFS.open("/frequency_analyzer.html", "r");
       String content = file.readString();
 
       if (status.detect == "IDLE") {
@@ -180,7 +180,7 @@
     });
 
     server.on("/settings", HTTP_GET, [] (AsyncWebServerRequest *request) {
-      File file = SPIFFS.open("/settings.html", "r");
+      File file = LittleFS.open("/settings.html", "r");
       String content = file.readString();
 
       file.close();

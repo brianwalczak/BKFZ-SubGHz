@@ -44,9 +44,9 @@ To flash the BKFZ SubGHz program on your ESP32, you'll need to connect the CC110
 | G18 | GDO2 |
 
 If you'd like to use a different pinout, you can configure the proper pins in the **config.h** configuration file (located in the **config** folder).
-Once you've connected the ESP32 to your computer, you'll need to download and install the [Arduino IDE](https://www.arduino.cc/en/software), as well as the [SPIFFS Upload](https://github.com/espx-cz/arduino-spiffs-upload) plugin (you can find instructions on installation and usage in the repository). The plugin is crucial to serve essential files through the web server (CSS, fonts, icons, etc).
+Once you've connected the ESP32 to your computer, you'll need to download and install the [Arduino IDE](https://www.arduino.cc/en/software), as well as the [LittleFS Upload](https://github.com/earlephilhower/arduino-littlefs-upload) plugin (you can find instructions on installation and usage in the repository). The plugin is crucial to serve essential files through the web server (CSS, fonts, icons, etc).
 
-After installing the IDE, download the latest release for this repository and extract the ZIP file. Then, launch the `BKFZ_SubGHz.ino` file located inside the folder, and upload the data files through SPIFFS (`Ctrl` + `Shift` + `P`, then `Upload SPIFFS to Pico/ESP8266/ESP32`). **Make sure your Serial Monitor is closed during the uploading process.**
+After installing the IDE, download the latest release for this repository and extract the ZIP file. Then, launch the `BKFZ_SubGHz.ino` file located inside the folder, and upload the data files through LittleFS (`Ctrl` + `Shift` + `P`, then `Upload LittleFS to Pico/ESP8266/ESP32`). **Make sure your Serial Monitor is closed during the uploading process.**
 
 Lastly, click the `Upload` icon in the Arduino IDE to flash the code on your ESP32. You'll see `Hard resetting via RTS pin...` once the writing is complete.
 
@@ -63,14 +63,14 @@ If you'd like to configure the settings used by the BKFZ SubGHZ, modify the defa
 - **presets.cpp:** Stores the list of available SubGHz presets (as used by the Flipper Zero) and their CC1101 register configurations. Declarations in `headers/presets.h`.
 - **user_settings.cpp:** Stores all user-configurable settings as well as their available options, including frequencies, RSSI thresholds, etc. Declarations in `headers/user_settings.h`.
 
-If you'd like to customize the user interface, you can find all of the HTML files in the **static** folder. Additionally, custom fonts, icons, and other libraries such as JQuery are found in the **data** folder (as used by SPIFFS). All of these files are served at `/static`.
+If you'd like to customize the user interface, you can find all of the HTML files in the **static** folder. Additionally, custom fonts, icons, and other libraries such as JQuery are found in the **data** folder (as used by LittleFS). All of these files are served at `/static`.
 
 ## Credits/Authors
 This project was made possible by utilizing the following dependencies:
 - [`ELECHOUSE_CC1101_SRC_DRV`](https://www.arduino.cc/reference/en/libraries/smartrc-cc1101-driver-lib/) | A library for controlling the CC1101 RF module, which is commonly used for wireless communication in Arduino projects.
 - [`ESPAsyncWebServer`](https://www.arduino.cc/reference/en/libraries/espasyncwebserver/) | A library that enables the creation of web servers on the ESP32 and ESP8266.
 - [`ArduinoJson`](https://www.arduino.cc/reference/en/libraries/arduinojson/) | A library for efficiently handling JSON data in Arduino projects, useful for parsing and generating JSON files.
-- [`ESP32 Core Libraries`](https://github.com/espressif/arduino-esp32/tree/master/libraries) | A collection of libraries pre-installed on the ESP32 (including Wi-Fi, SPI, SPIFFS, Preferences, and much more).
+- [`ESP32 Core Libraries`](https://github.com/espressif/arduino-esp32/tree/master/libraries) | A collection of libraries pre-installed on the ESP32 (including Wi-Fi, SPI, LittleFS, Preferences, and much more).
 - [`Flipper Zero`](https://github.com/flipperdevices/flipperzero-firmware) | This project couldn't be made possible without the extensive documentation and awesome team over at Flipper Zero ♥
 
 ## FAQ
