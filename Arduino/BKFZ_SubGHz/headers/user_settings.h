@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
+#include <Preferences.h>
 #include <vector>
 
 const int hopperFrequenciesUSA[] = {
@@ -40,5 +41,6 @@ extern Status status;
 String settingsToJson();
 String settingsOptionsToJson();
 String statusToJson();
+void saveSettings();
 
 #endif

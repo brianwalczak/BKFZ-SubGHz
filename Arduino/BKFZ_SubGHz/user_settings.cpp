@@ -105,3 +105,16 @@ String statusToJson() {
   serializeJson(doc, jsonString);
   return jsonString;
 }
+
+// Saves the current settings/configurations as non-volatile storage
+void saveSettings() {
+  preferences.begin("settings", false); // Open Preferences storage w/ settings
+
+  // Update all values in stored settings to the current settings
+  preferences.putString("preset", settings.preset);
+  preferences.putInt("frequency", settings.frequency);
+  preferences.putInt("rssi", settings.rssi);
+  preferences.putInt("detect_rssi", settings.detect_rssi);
+
+  preferences.end(); // Close Preferences when finished.
+}

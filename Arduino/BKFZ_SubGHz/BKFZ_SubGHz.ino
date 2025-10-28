@@ -1,6 +1,5 @@
 #include <ELECHOUSE_CC1101_SRC_DRV.h>
 #include <ArduinoJson.h>
-#include <Preferences.h>
 #include <esp_attr.h>
 #include <Arduino.h>
 #include <SPI.h>
@@ -49,19 +48,6 @@ void setupCC1101(bool transmit, int retry = false) {
       Serial.println(F("Failed CC1101 connection retry. Please check your pins."));
     }
   }
-}
-
-// Saves the current settings/configurations as non-volatile storage
-void saveSettings() {
-  preferences.begin("settings", false); // Open Preferences storage w/ settings
-
-  // Update all values in stored settings to the current settings
-  preferences.putString("preset", settings.preset);
-  preferences.putInt("frequency", settings.frequency);
-  preferences.putInt("rssi", settings.rssi);
-  preferences.putInt("detect_rssi", settings.detect_rssi);
-
-  preferences.end(); // Close Preferences when finished.
 }
 
 // Enables receiver mode and records RAW samples
