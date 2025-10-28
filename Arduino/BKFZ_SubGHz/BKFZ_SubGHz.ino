@@ -8,6 +8,7 @@
 #include <headers/presets.h> // contains all presets w/ their settings
 #include <headers/user_settings.h> // default user settings and their options
 #include <headers/interface.h> // interface for play, analyzer, settings, websockets, etc.
+#include <headers/globals.h> // global variables used across multiple files
 
 int samples[MAX_SAMPLES];
 int tempSmooth[MAX_SAMPLES];

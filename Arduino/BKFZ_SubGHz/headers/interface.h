@@ -14,6 +14,9 @@ void setupDevice();
 
 /* shared from main ino to interfaces */
 void flushSamples();
+void stopRecording();
+void startRecording();
+void smoothenSamples();
 void playSignal(const int *samples, int length);
 
 #endif

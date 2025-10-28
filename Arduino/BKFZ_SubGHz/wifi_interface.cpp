@@ -8,6 +8,7 @@
 
 #include <headers/config.h> // used to configure basic variables (such as pinout, max samples, etc.)
 #include <headers/user_settings.h> // default user settings and their options
+#include <headers/globals.h> // global variables used across multiple files
 
 #if CONNECTION_MODE == CONNECTION_MODE_WIFI
   AsyncWebServer server(SERVER_PORT);
@@ -32,7 +33,6 @@
     return setScript + setOptionsScript + statusScript;
   }
 
-  /*
   // Event handler for web sockets (mainly used for Frequency Analyzer as quick data transmission)
   void onWsEvent(AsyncWebSocket* server, AsyncWebSocketClient* client, AwsEventType type, void* arg, uint8_t* data, size_t len) {
     switch(type) {
@@ -117,7 +117,7 @@
 
                 String jsonString;
                 serializeJson(responseDoc, jsonString);
-                ws.textAll(jsonString);
+                sendData(jsonString);
                 jsonString.clear(); // clean up json string
                 flushSamples(); // flush the samples array once data was transmitted
               }
@@ -131,7 +131,6 @@
         break;
     }
   }
-  */
 
   void setupDevice() {
     WiFi.softAP(ssid, password);
@@ -250,7 +249,7 @@
       }
     });
 
-    // ws.onEvent(onWsEvent);
+    ws.onEvent(onWsEvent);
     server.addHandler(&ws);
     server.begin();
 
