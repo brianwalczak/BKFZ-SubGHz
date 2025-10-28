@@ -37,6 +37,7 @@ struct Status {
 extern Settings settings;
 extern SettingsOptions settingsOptions;
 extern Status status;
+extern Preferences preferences;
 
 String settingsToJson();
 String settingsOptionsToJson();

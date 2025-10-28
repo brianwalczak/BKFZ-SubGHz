@@ -1,4 +1,5 @@
 #include "headers/user_settings.h"
+Preferences preferences;
 
 /* Documentation & References /*
 # We should have a minimum RSSI of -85 and maximum of -40 (w/ steps of 5).

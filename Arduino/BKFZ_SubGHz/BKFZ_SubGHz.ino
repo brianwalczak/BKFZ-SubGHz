@@ -21,8 +21,6 @@ volatile int graphSkipped = 0;
 volatile int graphIndex = -1;
 volatile int lastSend = 0;
 
-Preferences preferences;
-
 // Updates the settings for the CC1101 (utilizes user settings)
 void setupCC1101(bool transmit, int retry = false) {
   ELECHOUSE_cc1101.setSpiPin(SCK_CPIN, MISO_CPIN, MOSI_CPIN, CSN_CPIN);
