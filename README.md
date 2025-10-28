@@ -58,10 +58,10 @@ If you'd like to add the user interface as a web app to your home screen, you ca
 Finally, open the settings tab on the user interface to configure the frequency, preset, and RSSI. Once you've configured these settings, you're all set!
 
 ## Customization (experimental)
-If you'd like to configure the settings used by the BKFZ SubGHZ, modify the default user configuration, or manage the presets, open the **config** folder in the project. You can configure the following files:
-- **config.h:** Used to store configurations by the device (such as pins, WiFi settings, etc).
-- **presets.h:** Stores all of the available presets (as used by the Flipper Zero) and its configurations.
-- **user_settings.h:** Contains the default user configuration, as well as their available options (also has hopper frequencies as used in the Frequency Analyzer).
+If you'd like to configure the settings used by the BKFZ SubGHZ, modify the default user configuration, or manage presets, modify the following files:
+- **headers/config.h:** Stores device configuration such as CC1101 pin-out, WiFi/BLE mode, and recording parameters.
+- **presets.cpp:** Stores the list of available SubGHz presets (as used by the Flipper Zero) and their CC1101 register configurations. Declarations in `headers/presets.h`.
+- **user_settings.cpp:** Stores all user-configurable settings as well as their available options, including frequencies, RSSI thresholds, etc. Declarations in `headers/user_settings.h`.
 
 If you'd like to customize the user interface, you can find all of the HTML files in the **static** folder. Additionally, custom fonts, icons, and other libraries such as JQuery are found in the **data** folder (as used by SPIFFS). All of these files are served at `/static`.
 
