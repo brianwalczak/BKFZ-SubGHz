@@ -1,6 +1,7 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useGlobal } from "../providers/GlobalContext";
+import { useNavigation } from "expo-router";
 
 const styles = StyleSheet.create({
   container: {
@@ -57,25 +58,26 @@ const styles = StyleSheet.create({
 
 export default function Home() {
   const { disconnectDevice } = useGlobal();
+  const navigation = useNavigation();
 
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>BKFZ SubGHz</Text>
       <Text style={styles.subtitle}>Easily read SubGHz communication protocols.</Text>
 
-      <TouchableOpacity style={styles.button} activeOpacity={0.8}>
+      <TouchableOpacity style={styles.button} activeOpacity={0.8} onPress={() => navigation.navigate("record" as never)}>
         <Text style={styles.buttonText}>Read</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button} activeOpacity={0.8}>
+      <TouchableOpacity style={styles.button} activeOpacity={0.8} onPress={() => navigation.navigate("play" as never)}>
         <Text style={styles.buttonText}>Play from File</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button} activeOpacity={0.8}>
+      <TouchableOpacity style={styles.button} activeOpacity={0.8} onPress={() => navigation.navigate("analyzer" as never)}>
         <Text style={[styles.buttonText, { fontSize: 14 }]}>Frequency Analyzer</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button} activeOpacity={0.8}>
+      <TouchableOpacity style={styles.button} activeOpacity={0.8} onPress={() => navigation.navigate("settings" as never)}>
         <Text style={styles.buttonText}>Settings</Text>
       </TouchableOpacity>
 
