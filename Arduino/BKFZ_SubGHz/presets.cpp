@@ -1,7 +1,4 @@
-#ifndef CC1101PRESETS_H
-#define CC1101PRESETS_H
-
-#include <ELECHOUSE_CC1101_SRC_DRV.h>
+#include "headers/presets.h"
 
 /* Documentation & References /*
 # We should have a minimum RSSI of -85 and maximum of -40 (w/ steps of 5).
@@ -118,23 +115,16 @@ const uint8_t FM476[] = {
     CC1101_FREND1, 0x56, // Front end RX configuration
 };
 
-
-struct Preset {
-    const char* name;
-    const uint8_t* data;
-    size_t length;
-};
-
-Preset Presets[] = {
+const Preset Presets[] = {
     { "AM270", AM270, sizeof(AM270) / sizeof(AM270[0]) },
     { "AM650", AM650, sizeof(AM650) / sizeof(AM650[0]) },
     { "FM238", FM238, sizeof(FM238) / sizeof(FM238[0]) },
     { "FM476", FM476, sizeof(FM476) / sizeof(FM476[0]) }
 };
 
-constexpr size_t numPresets = sizeof(Presets) / sizeof(Presets[0]);
+const size_t numPresets = sizeof(Presets) / sizeof(Presets[0]);
 
-Preset* findPreset(String name) {
+const Preset* findPreset(String name) {
     for (size_t i = 0; i < numPresets; ++i) {
         if (strcmp(Presets[i].name, name.c_str()) == 0) {
             return &Presets[i];
@@ -151,5 +141,3 @@ void applyConfiguration(const uint8_t* config, size_t length) {
     ELECHOUSE_cc1101.SpiWriteReg(reg, value);
   }
 }
-
-#endif

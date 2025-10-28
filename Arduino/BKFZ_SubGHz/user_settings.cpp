@@ -1,5 +1,4 @@
-#ifndef CC1101SETTINGS_H
-#define CC1101SETTINGS_H
+#include "headers/user_settings.h"
 
 /* Documentation & References /*
 # We should have a minimum RSSI of -85 and maximum of -40 (w/ steps of 5).
@@ -12,36 +11,8 @@
   https://github.com/flipperdevices/flipperzero-firmware/blob/7c88a4a8f1062063b74277c03617fb9e083e538b/lib/subghz/devices/cc1101_configs.c#L76
 */
 
-int hopperFrequenciesUSA[] = {
-    310000000,
-    315000000,
-    318000000,
-    390000000,
-    433920000,
-    868350000,
-};
-
-struct Settings {
-    String preset; // pointer (*) to reference Preset
-    int frequency;
-    int rssi;
-    int detect_rssi;
-};
-
-struct SettingsOptions {
-  String preset[numPresets];
-  int frequency[17];
-  int rssi[11];
-};
-
-// Used to display the status of the device (detecting, running, etc.)
-struct Status {
-    String detect;
-    String record;
-};
-
 // Settings which contains default presets (can be updated through the website)
-static Settings settings = {
+Settings settings = {
   "AM650", // Preset
   433920000, // Frequency
   -65, // Overall RSSI threshold
@@ -49,13 +20,13 @@ static Settings settings = {
 };
 
 // Array which contains the current status of the device
-static Status status = {
+Status status = {
   "IDLE", // Detect (frequency analyzer)
   "IDLE" // Recording (record)
 };
 
 // The available options for each setting (used to display on UI)
-static SettingsOptions settingsOptions = {
+SettingsOptions settingsOptions = {
   { "AM270", "AM650", "FM238", "FM476"}, // Presets
   { // Frequency
     /* 300 - 348 */
@@ -134,5 +105,3 @@ String statusToJson() {
   serializeJson(doc, jsonString);
   return jsonString;
 }
-
-#endif
