@@ -3,12 +3,14 @@ import { EventSubscription, Platform } from "react-native";
 import { request, check, PERMISSIONS, RESULTS } from "react-native-permissions";
 import BleManager, { BleState } from 'react-native-ble-manager';
 import { usePathname, useRouter } from "expo-router";
+import { Buffer } from 'buffer';
 const GlobalContext = createContext<any>(undefined);
 const nameFilter = "BKFZ";
 
 const SERVICE_UUID = "b1513422-2e10-4528-b293-39409019252f";
 const TX_UUID = "cffa88bb-f8ac-423b-9031-0266d4f3aec1";
 const RX_UUID = "d4f3aec1-423b-9031-0266-cffa88bb1234";
+const CHUNK_SIZE = 150;
 
 export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [permissions, setPermissions] = useState<boolean>(false);
@@ -120,6 +122,28 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         }
     }, [permissions, btInit, btConnected, disconnectDevice]);
 
+    // send JSON data to the connected device over BLE
+    const sendData = useCallback(async (json: object) => {
+        if (!btConnected) return false;
+
+        try {
+            const buffer = Buffer.from(JSON.stringify(json), 'utf8');
+
+            // gonna send in chunks to avoid issues
+            for (let i = 0; i < buffer.length; i += CHUNK_SIZE) {
+                const chunk = buffer.slice(i, i + CHUNK_SIZE);
+
+                await BleManager.write(btConnected, SERVICE_UUID, RX_UUID, chunk.toJSON().data, CHUNK_SIZE);
+                await new Promise(res => setTimeout(res, 10)); // small delay to ensure data is sent properly
+            }
+
+            return true;
+        } catch (err) {
+            console.log(err);
+            return false;
+        }
+    }, [btConnected]);
+
     // request user permissions on mount, update the state once requested
     useEffect(() => {
         if (permissions) return; // no request if already granted
@@ -196,19 +220,8 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                             await BleManager.startNotification(device?.peripheral, SERVICE_UUID, TX_UUID);
 
                             btDataSub.current = BleManager.onDidUpdateValueForCharacteristic(async (data: any) => {
-                                if (data?.peripheral === device?.peripheral && data?.characteristic === TX_UUID) {
-                                    try {
-                                        const value = Buffer.from(data.value, 'base64').toString('utf8');
-                                        console.log("testing, looks like we got data:", value);
-
-                                        try {
-                                            const parsed = JSON.parse(value);
-                                            console.log("was parsed into JSON:", parsed);
-                                        } catch (err) {
-                                            console.log("but JSON parsing failed:", err);
-                                        }
-                                    } catch { };
-                                }
+                                // still working on this, having some hiccups
+                                console.log(Buffer.from(data.value, 'base64').toString('utf8'));
                             });
                         } catch {
                             await disconnectDevice(); // disconnect if notification setup fails
@@ -287,7 +300,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }, []); // no devices needed since we're using setDevices latest state
 
     return (
-        <GlobalContext.Provider value={{ permissions, btState, devices, connectDevice, disconnectDevice }}>
+        <GlobalContext.Provider value={{ permissions, btState, devices, connectDevice, disconnectDevice, sendData }}>
             {children}
         </GlobalContext.Provider>
     );
