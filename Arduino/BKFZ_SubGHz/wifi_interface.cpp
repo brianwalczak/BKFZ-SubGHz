@@ -1,16 +1,16 @@
 #include "headers/interface.h"
-
-#include <WiFi.h>
-#include <ESPAsyncWebServer.h>
-#include <AsyncTCP.h>
-#include <LittleFS.h>
-#include <ArduinoJson.h>
-
 #include <headers/config.h> // used to configure basic variables (such as pinout, max samples, etc.)
-#include <headers/user_settings.h> // default user settings and their options
-#include <headers/globals.h> // global variables used across multiple files
 
 #if CONNECTION_MODE == CONNECTION_MODE_WIFI
+  #include <WiFi.h>
+  #include <ESPAsyncWebServer.h>
+  #include <AsyncTCP.h>
+  #include <LittleFS.h>
+  #include <ArduinoJson.h>
+
+  #include <headers/user_settings.h> // default user settings and their options
+  #include <headers/globals.h> // global variables used across multiple files
+
   AsyncWebServer server(SERVER_PORT);
   AsyncWebSocket ws("/ws");
 
