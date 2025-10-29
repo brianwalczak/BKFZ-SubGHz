@@ -6,6 +6,10 @@ import { usePathname, useRouter } from "expo-router";
 const GlobalContext = createContext<any>(undefined);
 const nameFilter = "BKFZ";
 
+const SERVICE_UUID = "b1513422-2e10-4528-b293-39409019252f";
+const TX_UUID = "cffa88bb-f8ac-423b-9031-0266d4f3aec1";
+const RX_UUID = "d4f3aec1-423b-9031-0266-cffa88bb1234";
+
 export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [permissions, setPermissions] = useState<boolean>(false);
     const [btState, setBtState] = useState<BleState | null>(null);
@@ -17,6 +21,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const btStateSub = React.useRef<EventSubscription | null>(null);
     const btConnectSub = React.useRef<EventSubscription | null>(null);
     const btDisconnectSub = React.useRef<EventSubscription | null>(null);
+    const btDataSub = React.useRef<EventSubscription | null>(null);
     const router = useRouter();
     const pathname = usePathname();
 
@@ -185,6 +190,29 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
                     if (deviceName && deviceName.includes(nameFilter)) {
                         setBtConnected(device?.peripheral); // register for connects
+
+                        try {
+                            await BleManager.retrieveServices(device?.peripheral);
+                            await BleManager.startNotification(device?.peripheral, SERVICE_UUID, TX_UUID);
+
+                            btDataSub.current = BleManager.onDidUpdateValueForCharacteristic(async (data: any) => {
+                                if (data?.peripheral === device?.peripheral && data?.characteristic === TX_UUID) {
+                                    try {
+                                        const value = Buffer.from(data.value, 'base64').toString('utf8');
+                                        console.log("testing, looks like we got data:", value);
+
+                                        try {
+                                            const parsed = JSON.parse(value);
+                                            console.log("was parsed into JSON:", parsed);
+                                        } catch (err) {
+                                            console.log("but JSON parsing failed:", err);
+                                        }
+                                    } catch { };
+                                }
+                            });
+                        } catch {
+                            await disconnectDevice(); // disconnect if notification setup fails
+                        }
                     }
                 }
             });
@@ -192,6 +220,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             btDisconnectSub.current = BleManager.onDisconnectPeripheral((device: any) => {
                 if (btConnectedRef.current && device?.peripheral === btConnectedRef.current) {
                     setBtConnected(null); // register for disconnects
+                    btDataSub.current?.remove();
                 }
             });
         })();
