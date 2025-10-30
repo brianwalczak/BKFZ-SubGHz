@@ -94,7 +94,7 @@ export default function Home() {
   const [output, setOutput] = useState("");
   const [playStatus, setPlayStatus] = useState<string | null>(null);
   const [graphData, setGraphData] = useState<number[]>([]);
-  const { registerEvent, sendData } = useGlobal();
+  const { registerEvent, sendData, settings } = useGlobal();
 
   function rssiToHeight(rssi: number) {
     const minRSSI = -90;
@@ -206,7 +206,7 @@ export default function Home() {
           <TouchableOpacity style={[styles.button, (recording ? { backgroundColor: "#dc3545" } : { backgroundColor: "#28a745" })]} activeOpacity={0.8} onPress={() => triggerRecording(!recording)}>
             <Text style={styles.buttonText}>{recording ? "Stop" : "Record"}</Text>
           </TouchableOpacity>
-          <Text style={styles.status}>AM650 | 433.92 MHz | -65 RSSI</Text>
+          <Text style={styles.status}>{!settings?.settings ? 'Loading, please wait...' : `${settings.settings?.preset} | ${(settings.settings?.frequency / 1000000).toFixed(2)} MHz | ${settings.settings?.rssi.toString() === "-200" ? 'Any' : settings.settings?.rssi} RSSI`}</Text>
 
           <View style={styles.graph}>
             {graphData.map((val, idx) => (
