@@ -7,9 +7,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#1c1c1c",
-    justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 20,
+    paddingVertical: 100
   },
   title: {
     fontFamily: "Press Start 2P",
