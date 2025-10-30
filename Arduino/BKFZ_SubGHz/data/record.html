@@ -147,7 +147,7 @@
 							const $newBar = $('<div>').addClass('bar').css('height', rssiToPercentage(newRSSI) + '%');
 							$('.graph').append($newBar);
 							
-							while ($('.graph').children().length > 5000) {
+							while ($('.graph').children().length > (5000 / 10)) {
 								$('.graph').children().first().remove();
 							}
 						});
