@@ -216,7 +216,7 @@ static String receivedData = "";
     String marked = (data + "\n"); // add \n to serve as the end marker
 
     if (deviceConnected) {
-      const int MTU_SIZE = BLEDevice::getMTU() - 5;
+      const int MTU_SIZE = BLEDevice::getMTU() - 5; // get negotiated MTU size minus overhead (will be capped at the maximum of 145 on iOS devices, and negotiated to 145 on Android devices)
       int dataLen = marked.length();
       
       for (int i = 0; i < dataLen; i += MTU_SIZE) {
@@ -232,7 +232,10 @@ static String receivedData = "";
 
   void setupDevice() {
     BLEDevice::init("BKFZ SubGHz");
-    BLEDevice::setMTU(150);
+
+    // Devices running iOS < 10 will request an MTU size of 158. Newer devices running iOS 10 will request an MTU size of 185.
+    // https://stackoverflow.com/questions/41977767/negotiate-ble-mtu-on-ios/42336001
+    BLEDevice::setMTU(145); // set maximum MTU size (on iOS devices it will be always throttled to 145 since minimum is 158, on Android we'll request this MTU on the app side to keep it as 145 as well)
     BLEServer *pServer = BLEDevice::createServer();
     pServer->setCallbacks(new ServerCallbacks());
     

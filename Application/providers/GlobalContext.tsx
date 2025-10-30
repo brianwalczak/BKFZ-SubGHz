@@ -214,9 +214,13 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                             await BleManager.retrieveServices(device?.peripheral);
                             await BleManager.startNotification(device?.peripheral, SERVICE_UUID, TX_UUID);
 
-                            BleManager.requestMTU(device?.peripheral, 150).then((mtu) => {
-                                CHUNK_SIZE = mtu - 5; // update chunk size based on negotiated MTU
-                            });
+                            if (Platform.OS === "android") {
+                                BleManager.requestMTU(device?.peripheral, 145).then((mtu) => {
+                                    CHUNK_SIZE = mtu - 5; // update chunk size based on negotiated MTU
+                                });
+                            } else if (Platform.OS === "ios") {
+                                CHUNK_SIZE = 145 - 5; // iOS devices will always be minimum of 158, and capped at 145 by the BLE server
+                            }
 
                             btDataSub.current = BleManager.onDidUpdateValueForCharacteristic(async (data: any) => {
                                 if (data?.peripheral === device?.peripheral && data?.characteristic === TX_UUID) {
