@@ -25,6 +25,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const btConnectSub = React.useRef<EventSubscription | null>(null);
     const btDisconnectSub = React.useRef<EventSubscription | null>(null);
     const btDataSub = React.useRef<EventSubscription | null>(null);
+    const settingsRef = React.useRef<{}>(null);
     const router = useRouter();
     const pathname = usePathname();
 
@@ -254,10 +255,16 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                                             if (parsed.url && dataCallbacks.current[parsed.url]) {
                                                 dataCallbacks.current[parsed.url].forEach(cb => cb(parsed));
                                             }
+
+                                            if (parsed?.url === "/settings" && parsed?.update === false) {
+                                                settingsRef.current = parsed.data || {};
+                                            }
                                         } catch { };
                                     } catch { };
                                 }
                             });
+
+                            await BleManager.write(device?.peripheral, SERVICE_UUID, RX_UUID, Buffer.from(JSON.stringify({ url: "/settings", update: false }) + '\n', 'utf8').toJSON().data, CHUNK_SIZE); // request current settings
                         } catch {
                             await disconnectDevice(); // disconnect if notification setup fails
                         }
@@ -335,7 +342,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }, []); // no devices needed since we're using setDevices latest state
 
     return (
-        <GlobalContext.Provider value={{ permissions, btState, devices, connectDevice, disconnectDevice, sendData, registerEvent }}>
+        <GlobalContext.Provider value={{ permissions, btState, devices, settings: settingsRef.current, connectDevice, disconnectDevice, sendData, registerEvent }}>
             {children}
         </GlobalContext.Provider>
     );

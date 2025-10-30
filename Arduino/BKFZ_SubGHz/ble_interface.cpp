@@ -204,6 +204,7 @@ static String receivedData = "";
                 confirmDoc["data"]["status"] = serialized(statusJSON);
             }
 
+            confirmDoc["update"] = (dataObject.containsKey("update") && dataObject["update"] == true) ? true : false;
             String confirmString;
             serializeJson(confirmDoc, confirmString);
             sendData(confirmString);
