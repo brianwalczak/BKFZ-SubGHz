@@ -30,10 +30,19 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     const devicesRef = React.useRef(devices);
     const btConnectedRef = React.useRef(btConnected);
+    const dataCallbacks = React.useRef(new Map<string, (data: any) => void>());
 
     // keep refs in sync w/ state for event handlers
     useEffect(() => { devicesRef.current = devices; }, [devices]);
     useEffect(() => { btConnectedRef.current = btConnected; }, [btConnected]);
+
+    const registerEvent = useCallback((url: string, cb: (data: any) => void) => {
+        dataCallbacks.current.set(url, cb);
+    }, []);
+
+    const unregisterEvent = useCallback((url: string) => {
+        dataCallbacks.current.delete(url);
+    }, []);
 
     // request bluetooth permissions from the user
     const requestPermissions = useCallback(async () => {
@@ -133,7 +142,6 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             await BleManager.write(btConnected, SERVICE_UUID, RX_UUID, buffer.toJSON().data, CHUNK_SIZE);
             return true;
         } catch (err) {
-            console.log(err);
             return false;
         }
     }, [btConnected]);
@@ -235,17 +243,15 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                                             return; // wait for more data
                                         }
 
-                                        console.log('looks like we received data:', value);
-
                                         try {
                                             const parsed = JSON.parse(value);
-                                            console.log("was parsed into JSON:", parsed);
-                                        } catch (err) {
-                                            console.log("but JSON parsing failed:", err);
-                                        }
-                                    } catch (error) {
-                                        console.log(error);
-                                    };
+                                            
+                                            if (parsed.url && dataCallbacks.current.has(parsed.url)) {
+                                                const cb = dataCallbacks.current.get(parsed.url);
+                                                if (cb) cb(parsed);
+                                            }
+                                        } catch { };
+                                    } catch { };
                                 }
                             });
                         } catch {
@@ -325,7 +331,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }, []); // no devices needed since we're using setDevices latest state
 
     return (
-        <GlobalContext.Provider value={{ permissions, btState, devices, connectDevice, disconnectDevice, sendData }}>
+        <GlobalContext.Provider value={{ permissions, btState, devices, connectDevice, disconnectDevice, sendData, registerEvent, unregisterEvent }}>
             {children}
         </GlobalContext.Provider>
     );
