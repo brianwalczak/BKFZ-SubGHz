@@ -216,7 +216,7 @@ static String receivedData = "";
     String marked = (data + "\n"); // add \n to serve as the end marker
 
     if (deviceConnected) {
-      const int MTU_SIZE = 20; // gonna send in chunks to avoid issues
+      const int MTU_SIZE = BLEDevice::getMTU() - 5;
       int dataLen = marked.length();
       
       for (int i = 0; i < dataLen; i += MTU_SIZE) {
@@ -232,6 +232,7 @@ static String receivedData = "";
 
   void setupDevice() {
     BLEDevice::init("BKFZ SubGHz");
+    BLEDevice::setMTU(150);
     BLEServer *pServer = BLEDevice::createServer();
     pServer->setCallbacks(new ServerCallbacks());
     

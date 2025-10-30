@@ -11,7 +11,7 @@ const SERVICE_UUID = "b1513422-2e10-4528-b293-39409019252f";
 const TX_UUID = "cffa88bb-f8ac-423b-9031-0266d4f3aec1";
 const RX_UUID = "d4f3aec1-423b-9031-0266-cffa88bb1234";
 const receivedData: { [key: string]: string } = {};
-const CHUNK_SIZE = 20;
+let CHUNK_SIZE = 20;
 
 export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [permissions, setPermissions] = useState<boolean>(false);
@@ -208,10 +208,15 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
                     if (deviceName && deviceName.includes(nameFilter)) {
                         setBtConnected(device?.peripheral); // register for connects
+                        CHUNK_SIZE = 20; // reset chunk size on new connection
 
                         try {
                             await BleManager.retrieveServices(device?.peripheral);
                             await BleManager.startNotification(device?.peripheral, SERVICE_UUID, TX_UUID);
+
+                            BleManager.requestMTU(device?.peripheral, 150).then((mtu) => {
+                                CHUNK_SIZE = mtu - 5; // update chunk size based on negotiated MTU
+                            });
 
                             btDataSub.current = BleManager.onDidUpdateValueForCharacteristic(async (data: any) => {
                                 if (data?.peripheral === device?.peripheral && data?.characteristic === TX_UUID) {
