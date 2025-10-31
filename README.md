@@ -2,7 +2,7 @@
 A robust program for your ESP32 to capture and replay SubGHz frequencies, inspired by the Flipper Zero and written in Arduino (C++).
 
 > [!WARNING]
-> **This project is currently in beta state as I work on bug fixes and improvements. If you find a bug, please report it <a href='https://github.com/BrianWalczak/BKFZ-SubGHz/issues'>here</a> :)**
+> **This project is currently under heavy construction and exciting new updates are coming! It's recommended that you download a stable release for usage. If you find a bug, please report it <a href='https://github.com/BrianWalczak/BKFZ-SubGHz/issues'>here</a> :)**
 
 ## Features
 - **Frequency Analyzer**: Scan and analyze nearby devices and their frequencies with ease.
