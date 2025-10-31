@@ -94,7 +94,7 @@ void frequencyAnalyzer() {
     }
 
     // If the signal is unique compared to last time, send through websocket
-    if(strongestFreq != lastFrequency && highestRssi != lastRSSI) {
+    if(strongestFreq != lastFrequency && highestRssi != lastRSSI && (strongestFreq != 0 && highestRssi != -INFINITY)) {
       DynamicJsonDocument doc(128);
       doc["url"] = "/analyzer";
       doc["data"]["freq"] = String(strongestFreq);
