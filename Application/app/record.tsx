@@ -42,20 +42,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 24,
   },
-  disconnectContainer: {
-    position: "absolute",
-    bottom: 40,
-    left: 0,
-    right: 0,
-    alignItems: "center",
-  },
-  disconnectText: {
-    color: "#ff4d4d",
-    fontFamily: "Open Sans",
-    fontSize: 16,
-    textAlign: "center",
-    fontWeight: "bold",
-  },
   status: {
     color: "#fff",
     fontFamily: "Open Sans",
@@ -87,7 +73,7 @@ const styles = StyleSheet.create({
   }
 });
 
-export default function Home() {
+export default function Record() {
   const [recording, setRecording] = useState(false);
   const [showAfter, setShowAfter] = useState(false);
   const [sampleCount, setSampleCount] = useState(0);
