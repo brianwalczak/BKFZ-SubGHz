@@ -26,8 +26,7 @@
 
 ## 📱 App Demo (Bluetooth)
 
-_I'm still working on the demo :D_
-
+https://github.com/user-attachments/assets/7e37f6ab-e881-4d77-856a-7cae88d8f64c
 
 ## 🌐 Web Demo (WiFi / Access Point)
 
