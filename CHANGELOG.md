@@ -30,7 +30,7 @@ https://github.com/user-attachments/assets/7e37f6ab-e881-4d77-856a-7cae88d8f64c
 
 ## 🌐 Web Demo (WiFi / Access Point)
 
-_I'm still working on the demo :D_
+https://github.com/user-attachments/assets/2cbcb2d0-29df-4d65-81d4-cca5f9d6b237
 
 ---
 
