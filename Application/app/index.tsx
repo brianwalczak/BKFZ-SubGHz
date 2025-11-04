@@ -4,13 +4,16 @@ import { BleState } from 'react-native-ble-manager';
 import { SafeAreaView } from "react-native-safe-area-context";
 import Warning from "../components/warning";
 import { useGlobal } from "../providers/GlobalContext";
+import { useRouter } from "expo-router";
+import { Feather } from '@expo/vector-icons';
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#000",
         alignItems: "center",
-        width: "100%"
+        width: "100%",
+        paddingTop: 10
     },
     title: {
         fontFamily: "Open Sans",
@@ -18,13 +21,6 @@ const styles = StyleSheet.create({
         textAlign: "center",
         fontWeight: "bold",
         fontSize: 22
-    },
-    subtitle: {
-        fontFamily: "Open Sans",
-        color: "#fff",
-        fontSize: 16,
-        textAlign: "center",
-        marginTop: 6
     },
     content: {
         flex: 1,
@@ -51,6 +47,7 @@ const styles = StyleSheet.create({
 export default function Index() {
     const { permissions, btState, devices, connectDevice } = useGlobal();
     const [connectingId, setConnectingId] = useState<string | null>(null);
+    const router = useRouter();
 
     async function connect(id: string) {
         if (!permissions) return;
@@ -62,9 +59,14 @@ export default function Index() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <Text style={styles.title}>Connect your Device</Text>
-            <Text style={styles.subtitle}>Choose a Bluetooth device below to connect.</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', marginBottom: 12, paddingHorizontal: 15 }}>
+                <TouchableOpacity style={{ width: 40, alignItems: 'flex-start' }} onPress={() => router.replace('/welcome')}>
+                    <Feather name="chevron-left" size={30} color="#fff" />
+                </TouchableOpacity>
 
+                <Text style={[styles.title, { flex: 1, textAlign: 'center' }]}>Connect your Device</Text>
+                <View style={{ width: 40, alignItems: 'flex-end', opacity: 0 }}><Feather name="chevron-left" size={30} color="#fff" /></View>{/* balance out i guess */}
+            </View>
             <View style={styles.content}>
                 {!permissions && (<Warning icon="settings" reason="permissions" />)}
                 {permissions && (btState === null || btState === BleState.Unknown || btState === BleState.Resetting || btState === BleState.Unsupported || btState === BleState.Unauthorized) && <Warning icon="bluetooth-disabled" reason="ble-error" />}

@@ -45,7 +45,6 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             const hasLaunched = await AsyncStorage.getItem('hasLaunched');
 
             if (hasLaunched === null) {
-                await AsyncStorage.setItem('hasLaunched', 'true');
                 return true;
             }
 
@@ -194,9 +193,9 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     // navigate through pages based on bluetooth connection state
     useEffect(() => {
-        if (btConnected && pathname === "/") {
+        if (btConnected && (pathname === "/" || pathname === "/welcome")) {
             router.replace("/home"); // navigate to home page
-        } else if (!btConnected && pathname !== "/") {
+        } else if (!btConnected && (pathname !== "/" && pathname !== "/welcome")) {
             (async () => {
                 const first = await isFirstTime();
 
