@@ -26,6 +26,16 @@
       ],
       "package": "com.brianwalczak.BKFZ_SubGHz"
     },
+    "ios": {
+      "bundleIdentifier": "com.brianwalczak.BKFZ-SubGHz",
+      "buildNumber": "1.0.0",
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSBluetoothAlwaysUsageDescription": "This app uses Bluetooth to communicate with your BKFZ SubGHz device.",
+        "NSBluetoothPeripheralUsageDescription": "This app uses Bluetooth to communicate with your BKFZ SubGHz device.",
+        "NSLocationWhenInUseUsageDescription": "Location access is required to scan for Bluetooth devices."
+      }
+    },
     "web": {
       "output": "static",
       "favicon": "./assets/images/favicon.png"
