@@ -86,8 +86,8 @@ export default function Index() {
                                 {devices.map((dev: any) => (
                                     <View key={dev.id} style={{ padding: 15, marginBottom: 12, backgroundColor: '#111', borderRadius: 6, flexDirection: 'row', alignItems: 'center' }}>
                                         <View style={{ flex: 1 }}>
-                                            <Text style={{ fontFamily: "Open Sans", fontWeight: "bold", color: 'white' }}>{dev.name || 'Unknown Device'}</Text>
-                                            <Text style={{ fontFamily: "Open Sans", color: '#888', fontSize: 12 }}>{dev.id || '----------------'}</Text>
+                                            <Text style={{ fontFamily: "Open Sans", fontWeight: "bold", color: 'white', paddingRight: 20 }} numberOfLines={1}>{dev.name || 'Unknown Device'}</Text>
+                                            <Text style={{ fontFamily: "Open Sans", color: '#888', fontSize: 12, paddingRight: 20 }} numberOfLines={1}>{dev.id || '----------------'}</Text>
                                         </View>
                                         <TouchableOpacity style={[
                                             styles.button,
