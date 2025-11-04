@@ -21,6 +21,7 @@
 - [ ] Make small UI improvements client-side
 - [ ] Improve storage system (maybe device storage?)
 - [ ] Remove JSON and create custom protocol
+- [ ] Fix page animation to use back motion properly
 
 ---
 
