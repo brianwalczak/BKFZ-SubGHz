@@ -272,7 +272,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                                                 dataCallbacks.current[parsed.url].forEach(cb => cb(parsed));
                                             }
 
-                                            if (parsed?.url === "/settings" && parsed?.update === false) {
+                                            if (parsed?.url === "/settings") {
                                                 settingsRef.current = parsed.data || {};
                                             }
                                         } catch { };

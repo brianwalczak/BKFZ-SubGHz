@@ -120,7 +120,6 @@ static String receivedData = "";
 
                 DynamicJsonDocument responseDoc(MAX_SAMPLES + 1024);
                 responseDoc["url"] = "/record";
-                responseDoc["data"]["success"] = true;
                 responseDoc["data"]["samples"] = result;
 
                 String jsonString;
@@ -175,10 +174,7 @@ static String receivedData = "";
           }
         }
 
-        if (doc["url"] == "/settings") {
-            DynamicJsonDocument confirmDoc(128);
-            confirmDoc["url"] = "/settings";
-            
+        if (doc["url"] == "/settings") {            
             if (dataObject.containsKey("update") && dataObject["update"] == true) {
                 if (dataObject.containsKey("preset")) {
                     settings.preset = dataObject["preset"].as<String>();
@@ -193,21 +189,21 @@ static String receivedData = "";
                 }
 
                 saveSettings(); // Save settings in non-volatile storage
-                confirmDoc["data"]["success"] = true;
             } else {
                 String setJSON = settingsToJson();
                 String setOptionsJSON = settingsOptionsToJson();
                 String statusJSON = statusToJson();
 
+                DynamicJsonDocument confirmDoc(128);
+                confirmDoc["url"] = "/settings";
                 confirmDoc["data"]["settings"] = serialized(setJSON);
                 confirmDoc["data"]["options"] = serialized(setOptionsJSON);
                 confirmDoc["data"]["status"] = serialized(statusJSON);
-            }
 
-            confirmDoc["update"] = (dataObject.containsKey("update") && dataObject["update"] == true) ? true : false;
-            String confirmString;
-            serializeJson(confirmDoc, confirmString);
-            sendData(confirmString);
+                String confirmString;
+                serializeJson(confirmDoc, confirmString);
+                sendData(confirmString);
+            }
         }
       }
     }
