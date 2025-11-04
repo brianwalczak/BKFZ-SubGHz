@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
 });
 
 export default function Analyzer() {
-  const { settings } = useGlobal();
+  const { updateSettings, settings } = useGlobal();
   const [rssi, setRssi] = useState(-85);
   const [history, setHistory] = useState("");
   const { registerEvent, sendData } = useGlobal();
@@ -79,7 +79,9 @@ export default function Analyzer() {
   const currentFreq = React.useRef<number | null>(null);
   const currentRssi = React.useRef<number | null>(null);
 
-  const updateRSSI = useCallback((value: number) => {
+  const updateRSSI = useCallback(async (value: number) => {
+    await updateSettings({ detect_rssi: value }, false); // update the setting locally only
+
     return sendData({
       url: "/analyzer",
       data: {
