@@ -1,7 +1,6 @@
 import React from "react";
-import { TouchableOpacity, Linking, Platform, Text, View, StyleSheet } from "react-native";
+import { TouchableOpacity, Linking, Platform, Text, View, StyleSheet, BackHandler } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import RNExitApp from 'react-native-exit-app';
 
 const styles = StyleSheet.create({
     title: {
@@ -46,7 +45,7 @@ const activity = {
         title: 'Unsupported Device',
         subtitle: 'Your device does not support Bluetooth connection.',
         primaryColor: '#DC2626',
-        buttonText: 'Close Application',
+        buttonText: (Platform.OS === 'ios' ? 'Open Settings' : 'Close Application'),
         action: closeApplication
     },
     'permissions': {
@@ -81,7 +80,11 @@ function openBluetooth() {
 
 function closeApplication() {
     try {
-        RNExitApp.exitApp(); // try closing app
+        if (Platform.OS === 'android') {
+            BackHandler.exitApp(); // close the app on Android w/ BackHandler
+        } else if (Platform.OS === 'ios') {
+            openBluetooth(); // no direct way to close app on iOS, redirect to bluetooth settings instead
+        }
     } catch {
         openSettings(); // fallback to settings
     }
