@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { EventSubscription, Platform } from "react-native";
 import { request, check, PERMISSIONS, RESULTS } from "react-native-permissions";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import BleManager, { BleState } from 'react-native-ble-manager';
 import { usePathname, useRouter } from "expo-router";
 import { Buffer } from 'buffer';
@@ -36,6 +37,23 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     // keep refs in sync w/ state for event handlers
     useEffect(() => { devicesRef.current = devices; }, [devices]);
     useEffect(() => { btConnectedRef.current = btConnected; }, [btConnected]);
+
+    // https://stackoverflow.com/questions/76219705/react-native-detect-first-time-app-launch
+    const isFirstTime = useCallback(async () => {
+        try {
+            // await AsyncStorage.removeItem('hasLaunched'); <---- use this for development
+            const hasLaunched = await AsyncStorage.getItem('hasLaunched');
+
+            if (hasLaunched === null) {
+                await AsyncStorage.setItem('hasLaunched', 'true');
+                return true;
+            }
+
+            return false;
+        } catch (error) {
+            return false;
+        }
+    }, []);
 
     const registerEvent = useCallback((url: string, cb: (data: any) => void) => {
         if (!dataCallbacks.current[url]) {
@@ -160,7 +178,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             (settingsRef.current as any).settings = { ...oldSettings, ...newSettings };
 
             if (request) {
-                return await sendData({ url: "/settings", data: { update: true, ...newSettings }});
+                return await sendData({ url: "/settings", data: { update: true, ...newSettings } });
             }
         }
 
@@ -179,9 +197,28 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         if (btConnected && pathname === "/") {
             router.replace("/home"); // navigate to home page
         } else if (!btConnected && pathname !== "/") {
-            router.replace("/"); // navigate to connection page
+            (async () => {
+                const first = await isFirstTime();
+
+                if (first) {
+                    router.replace("/welcome"); // navigate to welcome page on first launch
+                } else {
+                    router.replace("/"); // navigate to connection page
+                }
+            })();
         }
     }, [btConnected, pathname, router]);
+
+    // run on mount to show welcome page
+    useEffect(() => {
+        (async () => {
+            const first = await isFirstTime();
+
+            if (first && pathname === "/") {
+                router.replace("/welcome");
+            }
+        })();
+    }, [pathname]);
 
     // check for permission changes every 2 seconds in case user manually changes them
     useEffect(() => {
@@ -279,7 +316,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                                 }
                             });
 
-                            await BleManager.write(device?.peripheral, SERVICE_UUID, RX_UUID, Buffer.from(JSON.stringify({ url: "/settings", data: { update: false }}) + '\n', 'utf8').toJSON().data, CHUNK_SIZE); // request current settings
+                            await BleManager.write(device?.peripheral, SERVICE_UUID, RX_UUID, Buffer.from(JSON.stringify({ url: "/settings", data: { update: false } }) + '\n', 'utf8').toJSON().data, CHUNK_SIZE); // request current settings
                         } catch {
                             await disconnectDevice(); // disconnect if notification setup fails
                         }
