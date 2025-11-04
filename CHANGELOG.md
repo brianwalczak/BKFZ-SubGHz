@@ -11,7 +11,7 @@
   - [x] Home Page
   - [x] Record Page
   - [ ] Play Page
-  - [ ] Settings Page
+  - [x] Settings Page
   - [x] Frequency Analyzer
 - [x] Add Bluetooth transmission for app compatibility
 - [x] Update presets to better match Flipper Zero

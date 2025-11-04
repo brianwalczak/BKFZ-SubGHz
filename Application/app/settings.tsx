@@ -1,6 +1,6 @@
 import { StyleSheet, Text, TouchableOpacity, View, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { useGlobal } from "../providers/GlobalContext";
 
@@ -70,8 +70,9 @@ const styles = StyleSheet.create({
 });
 
 export default function Settings() {
-  const { settings } = useGlobal();
+  const { updateSettings, settings } = useGlobal();
   const [position, setPosition] = useState<any>(null);
+  const [message, setMessage] = useState<[string, string] | null>(null);
 
   useEffect(() => {
     if (settings) {
@@ -83,13 +84,7 @@ export default function Settings() {
     }
   }, [settings]);
 
-  if (!settings || !position) return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <ActivityIndicator size="large" />
-    </View>
-  );
-
-  const handleMove = (key: string, dir: -1 | 1) => {
+  const handleMove = useCallback((key: string, dir: -1 | 1) => {
     setPosition((prev: any) => {
       const max = settings.options[key].length - 1;
       let next = prev[key] + dir;
@@ -98,15 +93,38 @@ export default function Settings() {
       if (next > max) next = max;
       return { ...prev, [key]: next };
     });
-  };
+  }, [settings]);
 
-  const getDisplayValue = (key: string) => {
+  const getDisplayValue = useCallback((key: string) => {
     const val = settings.options[key][position[key]];
 
     if (key === "frequency") return (val / 1000000).toFixed(2) + " MHz";
     if (key === "rssi") return val === -200 ? "- - - - -" : val + " dBm";
     return val;
-  };
+  }, [position, settings]);
+
+  const saveSettings = useCallback(async () => {
+    const newSettings: any = {
+      preset: settings.options.preset[position.preset],
+      frequency: settings.options.frequency[position.frequency],
+      rssi: settings.options.rssi[position.rssi],
+    };
+
+    const save = await updateSettings(newSettings, true);
+    if (save) {
+      setMessage(['Your settings have been saved successfully!', 'success']);
+    } else {
+      setMessage(['Failed to save settings. Please try again.', 'error']);
+    }
+
+    setTimeout(() => setMessage(null), 2000);
+  }, [position, settings]);
+
+  if (!settings || !position) return (
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <ActivityIndicator size="large" />
+    </View>
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -128,9 +146,31 @@ export default function Settings() {
         </View>
       ))}
 
-      <TouchableOpacity style={[styles.button, { backgroundColor: "#28a745" }]} activeOpacity={0.8}>
+      <TouchableOpacity style={[styles.button, { backgroundColor: "#28a745" }]} activeOpacity={0.8} onPress={() => saveSettings()}>
         <Text style={styles.buttonText}>Save Settings</Text>
       </TouchableOpacity>
+
+      {message && (
+        <View
+          style={{
+            position: "absolute",
+            bottom: 40,
+            left: 30,
+            right: 30,
+            backgroundColor: message[1] === "success" ? "#28a745" : "#dc3545",
+            padding: 16,
+            borderRadius: 10,
+            alignItems: "center",
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.3,
+            shadowRadius: 4,
+            elevation: 5,
+          }}
+        >
+          <Text style={{ color: "#fff", fontSize: 16, textAlign: "center" }}>{message[0]}</Text>
+        </View>
+      )}
     </SafeAreaView>
   );
 }

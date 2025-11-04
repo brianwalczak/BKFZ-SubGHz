@@ -152,6 +152,21 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         }
     }, [btConnected]);
 
+    const updateSettings = useCallback(async (newSettings: { [key: string]: any }, request: boolean = false) => {
+        const oldSettings = (settingsRef.current as any)?.settings || {};
+        const hasChanges = Object.keys(newSettings).some(key => newSettings[key] !== oldSettings[key]);
+
+        if (hasChanges) {
+            (settingsRef.current as any).settings = { ...oldSettings, ...newSettings };
+
+            if (request) {
+                return await sendData({ url: "/settings", data: { update: true, ...newSettings }});
+            }
+        }
+
+        return true;
+    }, [sendData]);
+
     // request user permissions on mount, update the state once requested
     useEffect(() => {
         if (permissions) return; // no request if already granted
@@ -251,6 +266,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
                                         try {
                                             const parsed = JSON.parse(value);
+                                            console.log('new data', parsed);
 
                                             if (parsed.url && dataCallbacks.current[parsed.url]) {
                                                 dataCallbacks.current[parsed.url].forEach(cb => cb(parsed));
@@ -264,7 +280,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                                 }
                             });
 
-                            await BleManager.write(device?.peripheral, SERVICE_UUID, RX_UUID, Buffer.from(JSON.stringify({ url: "/settings", update: false }) + '\n', 'utf8').toJSON().data, CHUNK_SIZE); // request current settings
+                            await BleManager.write(device?.peripheral, SERVICE_UUID, RX_UUID, Buffer.from(JSON.stringify({ url: "/settings", data: { update: false }}) + '\n', 'utf8').toJSON().data, CHUNK_SIZE); // request current settings
                         } catch {
                             await disconnectDevice(); // disconnect if notification setup fails
                         }
@@ -342,7 +358,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }, []); // no devices needed since we're using setDevices latest state
 
     return (
-        <GlobalContext.Provider value={{ permissions, btState, devices, settings: settingsRef.current, connectDevice, disconnectDevice, sendData, registerEvent }}>
+        <GlobalContext.Provider value={{ permissions, btState, devices, settings: settingsRef.current, updateSettings, connectDevice, disconnectDevice, sendData, registerEvent }}>
             {children}
         </GlobalContext.Provider>
     );
