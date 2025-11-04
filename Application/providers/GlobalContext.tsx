@@ -266,7 +266,6 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
                                         try {
                                             const parsed = JSON.parse(value);
-                                            console.log('new data', parsed);
 
                                             if (parsed.url && dataCallbacks.current[parsed.url]) {
                                                 dataCallbacks.current[parsed.url].forEach(cb => cb(parsed));
