@@ -18,8 +18,6 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "permissions": [
-        "android.permission.BLUETOOTH",
-        "android.permission.BLUETOOTH_ADMIN",
         "android.permission.BLUETOOTH_CONNECT",
         "android.permission.BLUETOOTH_SCAN",
         "android.permission.ACCESS_FINE_LOCATION"
@@ -31,9 +29,7 @@
       "buildNumber": "1.0.0",
       "supportsTablet": true,
       "infoPlist": {
-        "NSBluetoothAlwaysUsageDescription": "This app uses Bluetooth to communicate with your BKFZ SubGHz device.",
-        "NSBluetoothPeripheralUsageDescription": "This app uses Bluetooth to communicate with your BKFZ SubGHz device.",
-        "NSLocationWhenInUseUsageDescription": "Location access is required to scan for Bluetooth devices."
+        "NSBluetoothAlwaysUsageDescription": "This app uses Bluetooth to communicate with your BKFZ SubGHz device."
       }
     },
     "web": {
