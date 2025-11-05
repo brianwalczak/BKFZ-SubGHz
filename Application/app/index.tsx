@@ -4,8 +4,7 @@ import { BleState } from 'react-native-ble-manager';
 import { SafeAreaView } from "react-native-safe-area-context";
 import Warning from "../components/warning";
 import { useGlobal } from "../providers/GlobalContext";
-import { useRouter } from "expo-router";
-import { Feather } from '@expo/vector-icons';
+import Back from "../components/back";
 
 const styles = StyleSheet.create({
     container: {
@@ -24,7 +23,7 @@ const styles = StyleSheet.create({
     },
     content: {
         flex: 1,
-        margin: 24,
+        margin: 30,
         padding: 16,
         paddingHorizontal: 18,
         width: '100%'
@@ -47,7 +46,6 @@ const styles = StyleSheet.create({
 export default function Index() {
     const { permissions, btState, devices, connectDevice } = useGlobal();
     const [connectingId, setConnectingId] = useState<string | null>(null);
-    const router = useRouter();
 
     async function connect(id: string) {
         if (!permissions) return;
@@ -59,14 +57,9 @@ export default function Index() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', marginBottom: 12, paddingHorizontal: 15 }}>
-                <TouchableOpacity style={{ width: 40, alignItems: 'flex-start' }} onPress={() => router.replace('/welcome')}>
-                    <Feather name="chevron-left" size={30} color="#fff" />
-                </TouchableOpacity>
+            <Back action="go" location={"/welcome"} force={true} />
+            <Text style={styles.title}>Connect your Device</Text>
 
-                <Text style={[styles.title, { flex: 1, textAlign: 'center' }]}>Connect your Device</Text>
-                <View style={{ width: 40, alignItems: 'flex-end', opacity: 0 }}><Feather name="chevron-left" size={30} color="#fff" /></View>{/* balance out i guess */}
-            </View>
             <View style={styles.content}>
                 {!permissions && (<Warning icon="settings" reason="permissions" />)}
                 {permissions && (btState === null || btState === BleState.Unknown || btState === BleState.Resetting || btState === BleState.Unsupported || btState === BleState.Unauthorized) && <Warning icon="bluetooth-disabled" reason="ble-error" />}

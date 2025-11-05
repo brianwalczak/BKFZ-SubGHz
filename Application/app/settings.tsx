@@ -3,6 +3,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useEffect, useState, useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { useGlobal } from "../providers/GlobalContext";
+import Back from "../components/back";
 
 const styles = StyleSheet.create({
   container: {
@@ -128,6 +129,7 @@ export default function Settings() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <Back action="back" />
       <Text style={styles.title}>Settings</Text>
       <Text style={styles.subtitle}>Manage SubGHz settings and modulation.</Text>
 

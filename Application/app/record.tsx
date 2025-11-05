@@ -5,6 +5,7 @@ import { useGlobal } from "../providers/GlobalContext";
 import { convertFile } from "../providers/utils";
 import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
+import Back from "../components/back";
 
 const styles = StyleSheet.create({
   container: {
@@ -184,6 +185,7 @@ export default function Record() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <Back action="back" />
       <Text style={styles.title}>SubGHz Capture</Text>
       <Text style={styles.subtitle}>Capture and store SubGHz signal data.</Text>
 

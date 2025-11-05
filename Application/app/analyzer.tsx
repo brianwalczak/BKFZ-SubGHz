@@ -3,6 +3,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useGlobal } from "../providers/GlobalContext";
 import Slider from '@react-native-community/slider';
 import React, { useEffect, useState, useCallback } from "react";
+import Back from "../components/back";
 
 const styles = StyleSheet.create({
   container: {
@@ -128,6 +129,7 @@ export default function Analyzer() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <Back action="back" />
       <Text style={styles.title}>Frequency Analyzer</Text>
       <Text style={styles.subtitle}>Analyze nearby SubGHz frequencies w/ RSSI.</Text>
 

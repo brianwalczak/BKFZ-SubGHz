@@ -1,4 +1,5 @@
 import React from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { TouchableOpacity } from "react-native";
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
@@ -7,18 +8,20 @@ export default function Back({ action, location = null, force = false }: { actio
     const router = useRouter();
 
     return (
-        <TouchableOpacity style={{ position: "absolute", left: 15, top: 50 }} onPress={() => {
-            if (action === 'back') {
-                router.back();
-            } else if (action === 'go' && location) {
-                if (force) {
-                    router.replace(location as never);
-                } else {
-                    router.push(location as never);
+        <SafeAreaView style={{ position: "absolute", left: 15, top: 10 }}>
+            <TouchableOpacity onPress={() => {
+                if (action === 'back') {
+                    router.back();
+                } else if (action === 'go' && location) {
+                    if (force) {
+                        router.replace(location as never);
+                    } else {
+                        router.push(location as never);
+                    }
                 }
-            }
-        }}>
-            <Feather name="chevron-left" size={30} color="#fff" />
-        </TouchableOpacity>
+            }}>
+                <Feather name="chevron-left" size={30} color="#fff" />
+            </TouchableOpacity>
+        </SafeAreaView>
     );
 };
