@@ -21,7 +21,8 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const [btInit, setBtInit] = useState<boolean>(false);
     const [devices, setDevices] = useState<any[]>([]);
 
-    const scanSub = React.useRef<EventSubscription | null>(null);
+    const startScanSub = React.useRef<EventSubscription | null>(null);
+    const stopScanSub = React.useRef<EventSubscription | null>(null);
     const btStateSub = React.useRef<EventSubscription | null>(null);
     const btConnectSub = React.useRef<EventSubscription | null>(null);
     const btDisconnectSub = React.useRef<EventSubscription | null>(null);
@@ -198,6 +199,50 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         return true;
     }, [sendData]);
 
+    const startScan = useCallback(() => {
+        // remove old bluetooth scanner if one still exists
+        if (startScanSub.current) {
+            startScanSub.current.remove();
+            startScanSub.current = null;
+        }
+
+        BleManager.stopScan();
+
+        if (stopScanSub.current) {
+            stopScanSub.current.remove();
+            stopScanSub.current = null;
+        }
+
+        if (!permissions || btConnected || !btInit) return;
+
+        BleManager.scan([], 30, false).then(() => {
+            console.log('new scanner');
+            startScanSub.current = BleManager.onDiscoverPeripheral((device: any) => {
+                console.log('device');
+                const data = { name: (device?.name || device?.advertising?.localName || null), id: device?.id };
+                if (!data.name?.includes(nameFilter)) return; // only show BKFZ devices
+                console.log('bkfz appears once again');
+
+                setDevices(prev => {
+                    const idx = prev.findIndex(d => d.id === data.id);
+
+                    if (idx !== -1) {
+                        const updated = [...prev];
+                        updated[idx] = { ...updated[idx], ...data, lastSeen: Date.now() };
+
+                        return updated;
+                    }
+
+                    return [...prev, { ...data, lastSeen: Date.now() }];
+                });
+            });
+
+            stopScanSub.current = BleManager.onStopScan(() => {
+                setTimeout(startScan, 2000); // restart scan after 2 seconds
+            });
+        });
+    }, [permissions, btConnected, btInit, setDevices]);
+
     // request user permissions on mount, update the state once requested
     useEffect(() => {
         if (permissions) return; // no request if already granted
@@ -354,36 +399,6 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     // handle bluetooth state changes and scanning
     useEffect(() => {
-        if (!permissions || btConnected || !btInit) return; // no need to scan if connected
-
-        let stopScanListener: EventSubscription | null = null;
-
-        const startScan = () => {
-            BleManager.scan([], 0, false).then(() => {
-                scanSub.current = BleManager.onDiscoverPeripheral((device: any) => {
-                    const data = { name: (device?.name || device?.advertising?.localName || null), id: device?.id };
-                    if (!data.name?.includes(nameFilter)) return; // only show BKFZ devices
-
-                    setDevices(prev => {
-                        const idx = prev.findIndex(d => d.id === data.id);
-
-                        if (idx !== -1) {
-                            const updated = [...prev];
-                            updated[idx] = { ...updated[idx], ...data, lastSeen: Date.now() };
-
-                            return updated;
-                        }
-
-                        return [...prev, { ...data, lastSeen: Date.now() }];
-                    });
-                });
-
-                stopScanListener = BleManager.onStopScan(() => {
-                    setTimeout(startScan, 2000); // restart scan after 2 seconds
-                });
-            });
-        };
-
         if (btState === BleState.On) {
             startScan();
         } else if (btState === BleState.Off) {
@@ -396,13 +411,16 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
         // cleanup on unmount or dependency change :D
         return () => {
-            if (scanSub.current) {
-                scanSub.current.remove();
-                BleManager.stopScan();
+            if (startScanSub.current) {
+                startScanSub.current.remove();
+                startScanSub.current = null;
             }
 
-            if (stopScanListener) {
-                stopScanListener.remove();
+            BleManager.stopScan();
+
+            if (stopScanSub.current) {
+                stopScanSub.current.remove();
+                stopScanSub.current = null;
             }
         };
     }, [btState, permissions, btConnected, btInit]);
@@ -411,8 +429,8 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     useEffect(() => {
         const interval = setInterval(() => {
             setDevices((prev: any) => {
-                // keep only devices seen in the last 10 seconds
-                return prev.filter((dev: any) => Date.now() - dev.lastSeen < 10000);
+                // keep only devices seen in the last 40 seconds (accounting for scan restarts every 30 seconds, 10 second difference)
+                return prev.filter((dev: any) => Date.now() - dev.lastSeen < 40000);
             });
         }, 5000);
 
