@@ -199,11 +199,15 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         return true;
     }, [sendData]);
 
-    const startScan = useCallback(() => {
+    const startScan = useCallback((clear: boolean = false) => {
         // remove old bluetooth scanner if one still exists
         if (startScanSub.current) {
             startScanSub.current.remove();
             startScanSub.current = null;
+        }
+
+        if (clear) {
+            setDevices([]);
         }
 
         BleManager.stopScan();
@@ -381,7 +385,6 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
             btDisconnectSub.current = BleManager.onDisconnectPeripheral((device: any) => {
                 if (btConnectedRef.current && device?.peripheral === btConnectedRef.current) {
-                    setDevices([]);
                     setBtConnected(null); // register for disconnects
                     btDataSub.current?.remove();
                 }
@@ -398,7 +401,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     // handle bluetooth state changes and scanning
     useEffect(() => {
         if (btState === BleState.On) {
-            startScan();
+            startScan(true);
         } else if (btState === BleState.Off) {
             try {
                 BleManager.enableBluetooth().catch(() => {
