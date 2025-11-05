@@ -30,7 +30,7 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSBluetoothAlwaysUsageDescription": "This app uses Bluetooth to communicate with your BKFZ SubGHz device.",
-        "NSBluetoothPeripheralUsageDescription": "This app uses Bluetooth to communicate with your BKFZ SubGHz device.",
+        "NSBluetoothPeripheralUsageDescription": "This app uses Bluetooth to communicate with your BKFZ SubGHz device."
       }
     },
     "web": {
