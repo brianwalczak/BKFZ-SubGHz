@@ -6,7 +6,7 @@
 ## Roadmap
 
 - [x] Create an app using React Native
-  - [ ] Welcome Page
+  - [x] Welcome Page
   - [x] Connect Device
   - [x] Home Page
   - [x] Record Page
@@ -22,6 +22,7 @@
 - [ ] Improve storage system (maybe device storage?)
 - [ ] Remove JSON and create custom protocol
 - [ ] Fix page animation to use back motion properly
+- [x] Test functionality on iOS devices, make changes
 
 ---
 
