@@ -78,8 +78,15 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                 setPermissions(true);
                 return true;
             }
+        } else if (Platform.OS === "ios") {
+            const bluetooth = await request(PERMISSIONS.IOS.BLUETOOTH);
+
+            if (bluetooth === RESULTS.GRANTED) {
+                setPermissions(true);
+                return true;
+            }
         } else {
-            setPermissions(true); // iOS or anything else i guess
+            setPermissions(true); // anything else i guess
             return true;
         }
 
@@ -98,8 +105,15 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                 setPermissions(true);
                 return true;
             }
+        } else if (Platform.OS === "ios") {
+            const bluetooth = await check(PERMISSIONS.IOS.BLUETOOTH);
+
+            if (bluetooth === RESULTS.GRANTED) {
+                setPermissions(true);
+                return true;
+            }
         } else {
-            setPermissions(true); // iOS or anything else i guess
+            setPermissions(true); // anything else i guess
             return true;
         }
 
