@@ -215,7 +215,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
         if (!permissions || btConnected || !btInit) return;
 
-        BleManager.scan([], 30, false).then(() => {
+        BleManager.scan([], 15, false).then(() => {
             startScanSub.current = BleManager.onDiscoverPeripheral((device: any) => {
                 const data = { name: (device?.name || device?.advertising?.localName || null), id: device?.id };
                 if (!data.name?.includes(nameFilter)) return; // only show BKFZ devices
@@ -381,6 +381,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
             btDisconnectSub.current = BleManager.onDisconnectPeripheral((device: any) => {
                 if (btConnectedRef.current && device?.peripheral === btConnectedRef.current) {
+                    setDevices([]);
                     setBtConnected(null); // register for disconnects
                     btDataSub.current?.remove();
                 }
@@ -426,8 +427,8 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     useEffect(() => {
         const interval = setInterval(() => {
             setDevices((prev: any) => {
-                // keep only devices seen in the last 40 seconds (accounting for scan restarts every 30 seconds, 10 second difference)
-                return prev.filter((dev: any) => Date.now() - dev.lastSeen < 40000);
+                // keep only devices seen in the last 25 seconds (accounting for scan restarts every 15 seconds, 10 second difference)
+                return prev.filter((dev: any) => Date.now() - dev.lastSeen < 25000);
             });
         }, 5000);
 
