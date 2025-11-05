@@ -356,8 +356,9 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     useEffect(() => {
         if (!permissions || btConnected || !btInit) return; // no need to scan if connected
 
-        if (btState === BleState.On) {
-            // start scanning once Bluetooth is enabled
+        let stopScanListener: EventSubscription | null = null;
+
+        const startScan = () => {
             BleManager.scan([], 0, false).then(() => {
                 scanSub.current = BleManager.onDiscoverPeripheral((device: any) => {
                     const data = { name: (device?.name || device?.advertising?.localName || null), id: device?.id };
@@ -376,7 +377,15 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                         return [...prev, { ...data, lastSeen: Date.now() }];
                     });
                 });
+
+                stopScanListener = BleManager.onStopScan(() => {
+                    setTimeout(startScan, 2000); // restart scan after 2 seconds
+                });
             });
+        };
+
+        if (btState === BleState.On) {
+            startScan();
         } else if (btState === BleState.Off) {
             try {
                 BleManager.enableBluetooth().catch(() => {
@@ -390,6 +399,10 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             if (scanSub.current) {
                 scanSub.current.remove();
                 BleManager.stopScan();
+            }
+
+            if (stopScanListener) {
+                stopScanListener.remove();
             }
         };
     }, [btState, permissions, btConnected, btInit]);

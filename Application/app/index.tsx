@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
         flex: 1,
         margin: 24,
         padding: 16,
-        paddingHorizontal: 30,
+        paddingHorizontal: 18,
         width: '100%'
     },
     button: {
@@ -73,9 +73,9 @@ export default function Index() {
                 {permissions && (btState !== null && btState !== BleState.On) && <Warning icon="bluetooth-disabled" reason="ble-disabled" />}
 
                 {permissions && (btState === BleState.On) && (
-                    <View style={{ marginTop: 20, width: '100%', flex: 1 }}>
+                    <View style={{ marginTop: 22, width: '100%', flex: 1 }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 28 }}>
-                            <Text style={{ fontFamily: "Open Sans", color: 'white', fontWeight: 'bold', marginRight: 8 }}>Searching</Text>
+                            <Text style={{ fontFamily: "Open Sans", color: 'white', fontWeight: 'bold', marginRight: 8, fontSize: 15 }}>Searching</Text>
                             <ActivityIndicator size="small" color="#aaa" />
                         </View>
 
@@ -84,9 +84,9 @@ export default function Index() {
                         ) : (
                             <ScrollView style={{ flex: 1 }}>
                                 {devices.map((dev: any) => (
-                                    <View key={dev.id} style={{ padding: 15, marginBottom: 12, backgroundColor: '#111', borderRadius: 6, flexDirection: 'row', alignItems: 'center' }}>
+                                    <View key={dev.id} style={{ padding: 13, marginBottom: 12, backgroundColor: '#1A1A1A', borderRadius: 12, flexDirection: 'row', alignItems: 'center' }}>
                                         <View style={{ flex: 1 }}>
-                                            <Text style={{ fontFamily: "Open Sans", fontWeight: "bold", color: 'white', paddingRight: 20 }} numberOfLines={1}>{dev.name || 'Unknown Device'}</Text>
+                                            <Text style={{ fontFamily: "Open Sans", fontWeight: "bold", color: 'white', paddingRight: 20, fontSize: 16 }} numberOfLines={1}>{dev.name || 'Unknown Device'}</Text>
                                             <Text style={{ fontFamily: "Open Sans", color: '#888', fontSize: 12, paddingRight: 20 }} numberOfLines={1}>{dev.id || '----------------'}</Text>
                                         </View>
                                         <TouchableOpacity style={[
