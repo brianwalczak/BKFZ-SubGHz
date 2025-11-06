@@ -1,3 +1,5 @@
+import { File } from 'expo-file-system';
+
 // Converts files into a readable sample format
 export function convertFile(data: string) {
     const samplesArray = [];
@@ -33,4 +35,16 @@ export function convertFile(data: string) {
         frequency: frequency,
         preset: preset
     };
+}
+
+// Reads file content from a given URI (local file path)
+export async function readFileContent(uri: string) {
+    try {
+        const file = new File(uri);
+        const text = await file.text();
+
+        return text;
+    } catch (error) {
+        return null;
+    }
 }
