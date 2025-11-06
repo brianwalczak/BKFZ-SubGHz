@@ -29,7 +29,7 @@
 
 ## 📱 App Demo (Bluetooth)
 
-https://github.com/user-attachments/assets/7e37f6ab-e881-4d77-856a-7cae88d8f64c
+https://github.com/user-attachments/assets/7d80933a-fae2-44cf-a396-04a467863631
 
 ## 🌐 Web Demo (WiFi / Access Point)
 
