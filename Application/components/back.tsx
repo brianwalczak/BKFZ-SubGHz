@@ -14,9 +14,9 @@ export default function Back({ action, location = null, force = false }: { actio
                     router.back();
                 } else if (action === 'go' && location) {
                     if (force) {
-                        router.replace(location as never);
+                        router.replace(location as any);
                     } else {
-                        router.push(location as never);
+                        router.push(location as any);
                     }
                 }
             }}>

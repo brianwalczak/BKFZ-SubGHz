@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TouchableOpacity, ScrollView, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, ScrollView, View, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useGlobal } from "../providers/GlobalContext";
 import { convertFile, readFileContent } from "../providers/utils";
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
 
 export default function Play() {
   const [files, setFiles] = useState<{ name: string | null; uri: string; isFlipper: boolean }[]>([]);
-  const [playStatus, setPlayStatus] = useState<string | null>(null);
+  const [playStatus, setPlayStatus] = useState<{ status: string; uri: string; startTime?: number; duration?: number } | null>(null);
   const { registerEvent, sendData } = useGlobal();
 
   const playFile = useCallback(async (uri: string) => {
@@ -71,12 +71,14 @@ export default function Play() {
 
     const playing = registerEvent("/play", (res: any) => {
       if (res.data?.success) {
-        setPlayStatus('playing');
+        const duration = data.samples.reduce((acc, sample) => acc + Math.abs(sample) / 1000, 0); // each unit represents 1 microsecond
 
-        let duration = 0;
-        for (const sample of data.samples) {
-          duration += Math.abs(sample) / 1000; // each unit represents 1 microsecond
-        }
+        setPlayStatus({
+          status: 'playing',
+          uri: uri,
+          startTime: Date.now(),
+          duration: duration
+        });
 
         setTimeout(() => {
           setPlayStatus(null);
@@ -96,9 +98,12 @@ export default function Play() {
       }
     });
 
-    setPlayStatus('waiting');
+    setPlayStatus({
+      status: 'waiting',
+      uri: uri
+    });
   }, [sendData]);
-  
+
   const updateFiles = useCallback(async () => {
     try {
       const data = await pick({
@@ -157,8 +162,22 @@ export default function Play() {
                 <Text style={{ fontSize: 18, color: "#fff", fontFamily: 'Press Start 2P', marginBottom: 8, alignSelf: "center" }} numberOfLines={1}>{file.name?.split(".")[0]}</Text>
                 <Text style={{ fontSize: 12, color: "#fff", fontFamily: 'Press Start 2P', marginBottom: 8, alignSelf: "center" }} numberOfLines={1}>{file.isFlipper ? "Flipper" : "Native"} SubGhz RAW File</Text>
 
+                {playStatus?.status === 'playing' && playStatus?.uri === file.uri && (
+                  <View style={{ marginTop: 20, alignItems: "center" }}>
+                    <ActivityIndicator size="large" color="#28a745" />
+                  </View>
+                )}
+
                 <TouchableOpacity style={[styles.button, { backgroundColor: "#28a745", marginTop: 20, width: '100%', paddingVertical: 20, alignSelf: "center" }]} activeOpacity={0.8} onPress={() => playFile(file.uri)} disabled={playStatus !== null}>
-                  <Text style={styles.buttonText}>Play</Text>
+                  <Text style={styles.buttonText}>
+                    {playStatus?.uri === file.uri
+                      ? playStatus?.status === 'waiting'
+                        ? 'Sending Data...'
+                        : playStatus?.status === 'playing'
+                          ? `Replaying... ${Math.min(100, Math.floor(((Date.now() - (playStatus?.startTime ?? 0)) / (playStatus?.duration ?? 1) * 100)))}%`
+                          : 'Play'
+                      : 'Play'}
+                  </Text>
                 </TouchableOpacity>
               </View>
             ))}
