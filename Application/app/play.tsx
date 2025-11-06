@@ -4,7 +4,7 @@ import { useGlobal } from "../providers/GlobalContext";
 import { convertFile, readFileContent } from "../providers/utils";
 import { pick } from '@react-native-documents/picker';
 import Back from "../components/back";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 
 const styles = StyleSheet.create({
   container: {
@@ -60,8 +60,19 @@ const styles = StyleSheet.create({
 
 export default function Play() {
   const [files, setFiles] = useState<{ name: string | null; uri: string; isFlipper: boolean }[]>([]);
-  const [playStatus, setPlayStatus] = useState<{ status: string; uri: string; startTime?: number; duration?: number } | null>(null);
+  const [playStatus, setPlayStatus] = useState<{ status: string; uri: string; } | null>(null);
+  const [progress, setProgress] = useState<number>(0);
+  const intervalRef = useRef<any>(null);
   const { registerEvent, sendData } = useGlobal();
+
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, []);
 
   const playFile = useCallback(async (uri: string) => {
     const fileText = await readFileContent(uri);
@@ -69,20 +80,37 @@ export default function Play() {
 
     const data = convertFile(fileText);
 
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+
     const playing = registerEvent("/play", (res: any) => {
       if (res.data?.success) {
         const duration = data.samples.reduce((acc, sample) => acc + Math.abs(sample) / 1000, 0); // each unit represents 1 microsecond
+        const startTime = Date.now();
 
         setPlayStatus({
           status: 'playing',
-          uri: uri,
-          startTime: Date.now(),
-          duration: duration
+          uri: uri
         });
 
-        setTimeout(() => {
-          setPlayStatus(null);
-        }, duration);
+        setProgress(0);
+
+        intervalRef.current = setInterval(() => {
+          const elapsed = Date.now() - startTime;
+          const percent = Math.min(100, Math.floor((elapsed / duration) * 100));
+
+          setProgress(percent);
+
+          if (percent >= 100) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+
+            setProgress(100);
+            setPlayStatus(null);
+          }
+        }, 50);
       }
 
       playing.remove();
@@ -102,6 +130,8 @@ export default function Play() {
       status: 'waiting',
       uri: uri
     });
+    
+    setProgress(0);
   }, [sendData]);
 
   const updateFiles = useCallback(async () => {
@@ -174,7 +204,7 @@ export default function Play() {
                       ? playStatus?.status === 'waiting'
                         ? 'Sending Data...'
                         : playStatus?.status === 'playing'
-                          ? `Replaying... ${Math.min(100, Math.floor(((Date.now() - (playStatus?.startTime ?? 0)) / (playStatus?.duration ?? 1) * 100)))}%`
+                          ? `Replaying... ${progress}%`
                           : 'Play'
                       : 'Play'}
                   </Text>
