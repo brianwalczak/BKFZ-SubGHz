@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useGlobal } from "../providers/GlobalContext";
 import Slider from '@react-native-community/slider';
@@ -126,6 +126,12 @@ export default function Analyzer() {
       });
     };
   }, []);
+
+  if (!settings) return (
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <ActivityIndicator size="large" />
+    </View>
+  );
 
   return (
     <SafeAreaView style={styles.container}>

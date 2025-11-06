@@ -191,6 +191,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         }
 
         if (clear) {
+            settingsRef.current = null;
             setDevices([]);
         }
 

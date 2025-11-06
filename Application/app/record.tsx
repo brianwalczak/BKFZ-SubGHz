@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useGlobal } from "../providers/GlobalContext";
 import { convertFile } from "../providers/utils";
@@ -107,7 +107,7 @@ export default function Record() {
       const file = new File(saveNow ? Paths.document : Paths.cache, 'BKFZ_Recording_' + Date.now() + '.sub');
       file.create();
       file.write(output);
-      
+
       if (saveNow) {
         alert('Your recording has been saved to your documents folder as ' + file.name + '.');
       } else {
@@ -182,6 +182,12 @@ export default function Record() {
       callback?.remove();
     };
   }, []);
+
+  if (!settings) return (
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <ActivityIndicator size="large" />
+    </View>
+  );
 
   return (
     <SafeAreaView style={styles.container}>
