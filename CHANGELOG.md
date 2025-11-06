@@ -23,6 +23,7 @@
 - [ ] Remove JSON and create custom protocol
 - [x] Fix page animation to use back motion properly
 - [x] Test functionality on iOS devices, make changes
+- [x] Create new revamped icons and assets
 
 ---
 
