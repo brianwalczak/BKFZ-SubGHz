@@ -57,7 +57,7 @@ export default function Index() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <Back action="go" location={"/welcome"} force={true} />
+            <Back action="back" />
             <Text style={styles.title}>Connect your Device</Text>
 
             <View style={styles.content}>

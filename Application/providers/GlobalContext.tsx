@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { EventSubscription, Platform } from "react-native";
 import { request, check, PERMISSIONS, RESULTS } from "react-native-permissions";
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import BleManager, { BleState } from 'react-native-ble-manager';
 import { usePathname, useRouter } from "expo-router";
 import { Buffer } from 'buffer';
@@ -39,22 +38,6 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     // keep refs in sync w/ state for event handlers
     useEffect(() => { devicesRef.current = devices; }, [devices]);
     useEffect(() => { btConnectedRef.current = btConnected; }, [btConnected]);
-
-    // https://stackoverflow.com/questions/76219705/react-native-detect-first-time-app-launch
-    const isFirstTime = useCallback(async () => {
-        try {
-            // await AsyncStorage.removeItem('hasLaunched'); <---- use this for development
-            const hasLaunched = await AsyncStorage.getItem('hasLaunched');
-
-            if (hasLaunched === null) {
-                return true;
-            }
-
-            return false;
-        } catch (error) {
-            return false;
-        }
-    }, []);
 
     const registerEvent = useCallback((url: string, cb: (data: any) => void) => {
         if (!dataCallbacks.current[url]) {
@@ -254,31 +237,12 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     // navigate through pages based on bluetooth connection state
     useEffect(() => {
-        if (btConnected && (pathname === "/" || pathname === "/welcome")) {
+        if (btConnected && (pathname === "/" || pathname === "/connect")) {
             router.replace("/home"); // navigate to home page
-        } else if (!btConnected && (pathname !== "/" && pathname !== "/welcome")) {
-            (async () => {
-                const first = await isFirstTime();
-
-                if (first) {
-                    router.replace("/welcome"); // navigate to welcome page on first launch
-                } else {
-                    router.replace("/"); // navigate to connection page
-                }
-            })();
+        } else if (!btConnected && (pathname !== "/" && pathname !== "/connect")) {
+            router.replace("/"); // start connection flow again
         }
     }, [btConnected, pathname, router]);
-
-    // run on mount to show welcome page
-    useEffect(() => {
-        (async () => {
-            const first = await isFirstTime();
-
-            if (first && pathname === "/") {
-                router.replace("/welcome");
-            }
-        })();
-    }, [pathname]);
 
     // check for permission changes every 2 seconds in case user manually changes them
     useEffect(() => {

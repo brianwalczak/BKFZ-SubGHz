@@ -2,7 +2,6 @@ import React, { useCallback } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import ESP32 from "../assets/svg/esp32";
 import { useRouter } from "expo-router";
 
@@ -71,11 +70,6 @@ const styles = StyleSheet.create({
 
 export default function Index() {
     const router = useRouter();
-    
-    const connect = useCallback(async () => {
-        await AsyncStorage.setItem('hasLaunched', 'true');
-        router.replace('/');
-    }, [AsyncStorage]);
 
     return (
         <SafeAreaView style={styles.container}>
@@ -88,7 +82,7 @@ export default function Index() {
                 <Text style={styles.subtitle}>Turn on your BKFZ SubGHz to enable Bluetooth connection.</Text>
             </View>
             <View style={styles.buttonContainer}>
-                <TouchableOpacity style={styles.button} activeOpacity={0.8} onPress={connect}>
+                <TouchableOpacity style={styles.button} activeOpacity={0.8} onPress={() => router.push("/connect")}>
                     <Text style={styles.buttonText}>Connect</Text>
                 </TouchableOpacity>
                 <Text style={styles.small}>Bluetooth must be enabled on this device.</Text>
