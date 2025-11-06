@@ -39,6 +39,38 @@ https://github.com/user-attachments/assets/2cbcb2d0-29df-4d65-81d4-cca5f9d6b237
 
 ## Timeline
 
+### 11/05/2025
+- Created play page w/ file reading utility, fixed typos
+- Added progress percentage display when playing files
+- Added smooth button progress bar w/ animation
+- Added Bluetooth compatibility for `react-native-permissions`
+- Created global toast message and included in layout
+- Updated to show welome page by default (fixed page direction)
+- Created custom icon, favicon, and splash for mobile app
+- Added loader for settings before the page is accessible
+- Fixed package versions for compatibility
+
+### 11/04/2025
+- Removed unnecessary / deprecated permissions
+- Added truncation of text to prevent new lines
+- Update Bluetooth permission check for iOS
+- Minor UI improvements for connection page
+- Added stopped scanning listener to prevent interruptions
+- Updated Bluetooth scanning to lower interval for precision
+- Clear devices list on disconnect (clear stale results)
+- Added global back arrow component for page navigation
+- Tested all functionality on iOS devices
+
+### 11/03/2025
+- Created settings page with global update logic
+- Fixed `detect_rssi` to update locally on changes
+- Added async storage to check for new users
+- Created welcome page, display for new users
+- Added back arrow in connection page
+- Created design in **Adobe Illustrator** for welcome page
+- Removed faulty dependency for iOS (failed compilation)
+- Added and fixed iOS permissions w/ descriptions
+
 ### 10/30/2025
 - Created record page w/ file saving implementation
 - Created utils.ts for shared functions
@@ -58,7 +90,7 @@ https://github.com/user-attachments/assets/2cbcb2d0-29df-4d65-81d4-cca5f9d6b237
 - Added simple Bluetooth data logic (notifications)
 - Created function to send data via Bluetooth
 - Add end markers for writing data, parsed end marker for receiving data
-- Added Bluetooth interface logic and marker checking. (Arduino)
+- Added Bluetooth interface logic and marker checking (Arduino)
 
 ### 10/27/2025
 - Moved device connection logic to global context
