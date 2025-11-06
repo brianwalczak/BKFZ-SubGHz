@@ -20,6 +20,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const [btConnected, setBtConnected] = useState<string | null>(null);
     const [btInit, setBtInit] = useState<boolean>(false);
     const [devices, setDevices] = useState<any[]>([]);
+    const [message, setMessage] = useState<[string, string] | null>(null);
 
     const startScanSub = React.useRef<EventSubscription | null>(null);
     const stopScanSub = React.useRef<EventSubscription | null>(null);
@@ -439,7 +440,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }, []); // no devices needed since we're using setDevices latest state
 
     return (
-        <GlobalContext.Provider value={{ permissions, btState, devices, settings: settingsRef.current, updateSettings, connectDevice, disconnectDevice, sendData, registerEvent }}>
+        <GlobalContext.Provider value={{ permissions, btState, devices, settings: settingsRef.current, updateSettings, connectDevice, disconnectDevice, sendData, registerEvent, message, setMessage }}>
             {children}
         </GlobalContext.Provider>
     );

@@ -71,9 +71,8 @@ const styles = StyleSheet.create({
 });
 
 export default function Settings() {
-  const { updateSettings, settings } = useGlobal();
+  const { updateSettings, settings, setMessage } = useGlobal();
   const [position, setPosition] = useState<any>(null);
-  const [message, setMessage] = useState<[string, string] | null>(null);
 
   useEffect(() => {
     if (settings) {
@@ -151,28 +150,6 @@ export default function Settings() {
       <TouchableOpacity style={[styles.button, { backgroundColor: "#28a745" }]} activeOpacity={0.8} onPress={() => saveSettings()}>
         <Text style={styles.buttonText}>Save Settings</Text>
       </TouchableOpacity>
-
-      {message && (
-        <View
-          style={{
-            position: "absolute",
-            bottom: 40,
-            left: 30,
-            right: 30,
-            backgroundColor: message[1] === "success" ? "#28a745" : "#dc3545",
-            padding: 16,
-            borderRadius: 10,
-            alignItems: "center",
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.3,
-            shadowRadius: 4,
-            elevation: 5,
-          }}
-        >
-          <Text style={{ color: "#fff", fontSize: 16, textAlign: "center" }}>{message[0]}</Text>
-        </View>
-      )}
     </SafeAreaView>
   );
 }
