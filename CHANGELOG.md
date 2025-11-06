@@ -10,7 +10,7 @@
   - [x] Connect Device
   - [x] Home Page
   - [x] Record Page
-  - [ ] Play Page
+  - [x] Play Page
   - [x] Settings Page
   - [x] Frequency Analyzer
 - [x] Add Bluetooth transmission for app compatibility

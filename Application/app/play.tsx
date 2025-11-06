@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TouchableOpacity, ScrollView, View, ActivityIndicator } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, ScrollView, View, ActivityIndicator, Animated } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useGlobal } from "../providers/GlobalContext";
 import { convertFile, readFileContent } from "../providers/utils";
@@ -62,8 +62,17 @@ export default function Play() {
   const [files, setFiles] = useState<{ name: string | null; uri: string; isFlipper: boolean }[]>([]);
   const [playStatus, setPlayStatus] = useState<{ status: string; uri: string; } | null>(null);
   const [progress, setProgress] = useState<number>(0);
+  const animatedProgress = useRef(new Animated.Value(0)).current;
   const intervalRef = useRef<any>(null);
   const { registerEvent, sendData } = useGlobal();
+
+  useEffect(() => {
+    Animated.timing(animatedProgress, {
+      toValue: progress,
+      duration: 100,
+      useNativeDriver: false
+    }).start();
+  }, [progress]);
 
   useEffect(() => {
     return () => {
@@ -96,6 +105,7 @@ export default function Play() {
         });
 
         setProgress(0);
+        animatedProgress.setValue(0);
 
         intervalRef.current = setInterval(() => {
           const elapsed = Date.now() - startTime;
@@ -108,7 +118,9 @@ export default function Play() {
             intervalRef.current = null;
 
             setProgress(100);
-            setPlayStatus(null);
+            setTimeout(() => {
+              setPlayStatus(null);
+            }, 600);
           }
         }, 50);
       }
@@ -130,7 +142,8 @@ export default function Play() {
       status: 'waiting',
       uri: uri
     });
-    
+
+    animatedProgress.setValue(0);
     setProgress(0);
   }, [sendData]);
 
@@ -192,14 +205,26 @@ export default function Play() {
                 <Text style={{ fontSize: 18, color: "#fff", fontFamily: 'Press Start 2P', marginBottom: 8, alignSelf: "center" }} numberOfLines={1}>{file.name?.split(".")[0]}</Text>
                 <Text style={{ fontSize: 12, color: "#fff", fontFamily: 'Press Start 2P', marginBottom: 8, alignSelf: "center" }} numberOfLines={1}>{file.isFlipper ? "Flipper" : "Native"} SubGhz RAW File</Text>
 
-                {playStatus?.status === 'playing' && playStatus?.uri === file.uri && (
-                  <View style={{ marginTop: 20, alignItems: "center" }}>
-                    <ActivityIndicator size="large" color="#28a745" />
-                  </View>
-                )}
+                <TouchableOpacity style={[styles.button, { backgroundColor: "#28a745", marginTop: 20, width: '100%', paddingVertical: 20, alignSelf: "center", overflow: 'hidden', position: 'relative' }]} activeOpacity={0.8} onPress={() => playFile(file.uri)} disabled={playStatus !== null}>
+                  {playStatus?.uri === file.uri && playStatus?.status === 'playing' && (
+                    <Animated.View
+                      style={{
+                        position: 'absolute',
+                        left: 0,
+                        top: 0,
+                        bottom: 0,
+                        width: animatedProgress.interpolate({
+                          inputRange: [0, 100],
+                          outputRange: ['0%', '100%'],
+                        }),
+                        backgroundColor: '#278a3eff',
+                        zIndex: 1,
+                        borderRadius: 8,
+                      }}
+                    />
+                  )}
 
-                <TouchableOpacity style={[styles.button, { backgroundColor: "#28a745", marginTop: 20, width: '100%', paddingVertical: 20, alignSelf: "center" }]} activeOpacity={0.8} onPress={() => playFile(file.uri)} disabled={playStatus !== null}>
-                  <Text style={styles.buttonText}>
+                  <Text style={[styles.buttonText, { zIndex: 2, position: 'relative' }]}>
                     {playStatus?.uri === file.uri
                       ? playStatus?.status === 'waiting'
                         ? 'Sending Data...'
