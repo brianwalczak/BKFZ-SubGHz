@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   subtitle: {
-    fontFamily: "Open Sans",
+    fontFamily: "Roboto",
     color: "#d3d3d3",
     fontSize: 18,
     textAlign: "center",
@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
   },
   status: {
     color: "#fff",
-    fontFamily: "Open Sans",
+    fontFamily: "Roboto",
     fontSize: 14,
     textAlign: "center",
     marginBottom: 10,
@@ -52,13 +52,13 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: "bold",
     marginBottom: 8,
-    fontFamily: "Open Sans",
+    fontFamily: "Roboto",
   },
   rssi: {
     color: "#fff",
     fontSize: 20,
     fontWeight: "bold",
-    fontFamily: "Open Sans",
+    fontFamily: "Roboto",
   },
   history: {
     width: 300,
@@ -150,7 +150,7 @@ export default function Analyzer() {
       </View>
 
       <ScrollView style={styles.history} contentContainerStyle={{ flexGrow: 1 }}>
-        <Text style={{ color: "#fff", fontSize: 14, fontFamily: "Open Sans", fontWeight: "bold", textAlign: "center", lineHeight: 24 }}>
+        <Text style={{ color: "#fff", fontSize: 14, fontFamily: "Roboto", fontWeight: "bold", textAlign: "center", lineHeight: 24 }}>
           {history || "No frequency history."}
         </Text>
       </ScrollView>

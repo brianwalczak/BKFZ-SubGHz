@@ -15,7 +15,7 @@ const styles = StyleSheet.create({
         paddingTop: 10
     },
     title: {
-        fontFamily: "Open Sans",
+        fontFamily: "Roboto",
         color: "#fff",
         textAlign: "center",
         fontWeight: "bold",
@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         color: 'white',
-        fontFamily: 'Open Sans',
+        fontFamily: 'Roboto',
         fontSize: 14,
         fontWeight: 'bold',
         textAlign: 'center'
@@ -68,19 +68,19 @@ export default function Index() {
                 {permissions && (btState === BleState.On) && (
                     <View style={{ marginTop: 22, width: '100%', flex: 1 }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 28 }}>
-                            <Text style={{ fontFamily: "Open Sans", color: 'white', fontWeight: 'bold', marginRight: 8, fontSize: 15 }}>Searching</Text>
+                            <Text style={{ fontFamily: "Roboto", color: 'white', fontWeight: 'bold', marginRight: 8, fontSize: 15 }}>Searching</Text>
                             <ActivityIndicator size="small" color="#aaa" />
                         </View>
 
                         {devices.length === 0 ? (
-                            <Text style={{ fontFamily: "Open Sans", color: '#aaa', textAlign: 'center' }}>Searching for devices, please wait...</Text>
+                            <Text style={{ fontFamily: "Roboto", color: '#aaa', textAlign: 'center' }}>Searching for devices, please wait...</Text>
                         ) : (
                             <ScrollView style={{ flex: 1 }}>
                                 {devices.map((dev: any) => (
                                     <View key={dev.id} style={{ padding: 13, marginBottom: 12, backgroundColor: '#1A1A1A', borderRadius: 12, flexDirection: 'row', alignItems: 'center' }}>
                                         <View style={{ flex: 1 }}>
-                                            <Text style={{ fontFamily: "Open Sans", fontWeight: "bold", color: 'white', paddingRight: 20, fontSize: 16 }} numberOfLines={1}>{dev.name || 'Unknown Device'}</Text>
-                                            <Text style={{ fontFamily: "Open Sans", color: '#888', fontSize: 12, paddingRight: 20 }} numberOfLines={1}>{dev.id || '----------------'}</Text>
+                                            <Text style={{ fontFamily: "Roboto", fontWeight: "bold", color: 'white', paddingRight: 20, fontSize: 16 }} numberOfLines={1}>{dev.name || 'Unknown Device'}</Text>
+                                            <Text style={{ fontFamily: "Roboto", color: '#888', fontSize: 12, paddingRight: 20 }} numberOfLines={1}>{dev.id || '----------------'}</Text>
                                         </View>
                                         <TouchableOpacity style={[
                                             styles.button,

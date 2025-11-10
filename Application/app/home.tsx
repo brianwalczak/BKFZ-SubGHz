@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   subtitle: {
-    fontFamily: "Open Sans",
+    fontFamily: "Roboto",
     color: "#d3d3d3",
     fontSize: 18,
     textAlign: "center",
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
   },
   disconnectText: {
     color: "#ff4d4d",
-    fontFamily: "Open Sans",
+    fontFamily: "Roboto",
     fontSize: 16,
     textAlign: "center",
     fontWeight: "bold",

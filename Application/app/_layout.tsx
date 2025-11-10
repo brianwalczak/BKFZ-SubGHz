@@ -37,7 +37,7 @@ export default function RootLayout() {
   useEffect(() => {
     (async () => {
       await Font.loadAsync({
-        "Open Sans": require("../assets/fonts/Open_Sans.ttf"),
+        "Roboto": require("../assets/fonts/Roboto.ttf"),
         "Press Start 2P": require("../assets/fonts/Press_Start_2P.ttf")
       });
       setLoaded(true);

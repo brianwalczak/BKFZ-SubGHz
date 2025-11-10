@@ -14,21 +14,21 @@ const styles = StyleSheet.create({
         paddingTop: 50
     },
     title: {
-        fontFamily: "Open Sans",
+        fontFamily: "Roboto",
         color: "#fff",
         textAlign: "center",
         fontWeight: "bold",
         fontSize: 28
     },
     subtitle: {
-        fontFamily: "Open Sans",
+        fontFamily: "Roboto",
         color: "#fff",
         fontSize: 18,
         textAlign: "center",
         marginTop: 6
     },
     small: {
-        fontFamily: "Open Sans",
+        fontFamily: "Roboto",
         color: "#ccc",
         fontSize: 14,
         textAlign: "center",
@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         color: 'white',
-        fontFamily: 'Open Sans',
+        fontFamily: 'Roboto',
         fontSize: 17,
         fontWeight: 'bold',
         textAlign: 'center'

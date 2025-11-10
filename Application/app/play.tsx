@@ -22,7 +22,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   subtitle: {
-    fontFamily: "Open Sans",
+    fontFamily: "Roboto",
     color: "#d3d3d3",
     fontSize: 18,
     textAlign: "center",

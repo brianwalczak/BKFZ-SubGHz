@@ -4,14 +4,14 @@ import { MaterialIcons } from "@expo/vector-icons";
 
 const styles = StyleSheet.create({
     title: {
-        fontFamily: 'Open Sans',
+        fontFamily: 'Roboto',
         fontSize: 20,
         fontWeight: 'bold',
         marginTop: 10,
         color: 'white'
     },
     subtitle: {
-        fontFamily: 'Open Sans',
+        fontFamily: 'Roboto',
         fontSize: 14,
         fontWeight: 'bold',
         marginTop: 6,
@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         color: 'white',
-        fontFamily: 'Open Sans',
+        fontFamily: 'Roboto',
         fontSize: 16,
         fontWeight: 'bold',
         textAlign: 'center'
