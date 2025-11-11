@@ -3,6 +3,7 @@ import { EventSubscription, Platform } from "react-native";
 import { request, check, PERMISSIONS, RESULTS } from "react-native-permissions";
 import BleManager, { BleState } from 'react-native-ble-manager';
 import { usePathname, useRouter } from "expo-router";
+import { parsePacket } from './packets.js';
 import { Buffer } from 'buffer';
 const GlobalContext = createContext<any>(undefined);
 const nameFilter = "BKFZ";
@@ -316,6 +317,8 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                             btDataSub.current = BleManager.onDidUpdateValueForCharacteristic(async (data: any) => {
                                 if (data?.peripheral === device?.peripheral && data?.characteristic === TX_UUID) {
                                     try {
+                                        console.log('new data');
+                                        console.log(parsePacket(data.value));
                                         let value = Buffer.from(data.value, 'base64').toString('utf8');
                                         receivedData[data?.peripheral] = (receivedData[data?.peripheral] || '') + value;
 

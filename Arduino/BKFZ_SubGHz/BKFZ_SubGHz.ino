@@ -9,6 +9,7 @@
 #include <headers/user_settings.h> // default user settings and their options
 #include <headers/interface.h> // interface for play, analyzer, settings, websockets, etc.
 #include <headers/globals.h> // global variables used across multiple files
+#include <headers/packets.h>
 
 int samples[MAX_SAMPLES];
 int tempSmooth[MAX_SAMPLES];
@@ -95,20 +96,17 @@ void frequencyAnalyzer() {
 
     // If the signal is unique compared to last time, send through websocket
     if(strongestFreq != lastFrequency && highestRssi != lastRSSI && (strongestFreq != 0 && highestRssi != -INFINITY)) {
-      DynamicJsonDocument doc(128);
-      doc["url"] = "/analyzer";
-      doc["data"]["freq"] = String(strongestFreq);
-      doc["data"]["rssi"] = String(highestRssi);
-
-      String jsonString;
-      serializeJson(doc, jsonString);
-
       // Set the frequency to last seen (used to prevent repetition of the same signal)
       lastFrequency = strongestFreq;
       lastRSSI = highestRssi;
 
-      sendData(jsonString);
-      jsonString.clear(); // clean up json string
+      AnalyzerOut pkt;
+      pkt.p_len = sizeof(AnalyzerOut);
+      pkt.cmd = static_cast<uint8_t>(Command::ANALYZER);
+
+      pkt.frequency = strongestFreq;
+      pkt.rssi = highestRssi;
+      sendData(reinterpret_cast<uint8_t*>(&pkt), sizeof(pkt));
     }
   }
 
@@ -276,19 +274,20 @@ void checkGraph() {
   if(micros() - lastSend > 100000 && graphIndex >= 1) { // the last time it was updated was >100ms ago
     lastSend = micros();
 
-    DynamicJsonDocument doc(256);
-    doc["url"] = "/record";
-    JsonArray graphArray = doc["data"]["graph"].to<JsonArray>();
-    for (int i = 0; i < graphIndex; ++i) {
-      graphArray.add(itemsToGraph[i]);
-    }
-    doc["data"]["length"] = sampleIndex;
-    
-    String jsonString;
-    serializeJson(doc, jsonString);
-    sendData(jsonString);
+    // get packet size, allocate buffer
+    const size_t packetSize = sizeof(GraphOut) + (graphIndex * sizeof(int16_t));
+    uint8_t* buffer = (uint8_t*)malloc(packetSize);
+    if (!buffer) return;
 
-    jsonString.clear(); // clean up json string
+    GraphOut* pkt = reinterpret_cast<GraphOut*>(buffer);
+    pkt -> p_len = packetSize;
+    pkt -> cmd = static_cast<uint8_t>(Command::GRAPH);
+
+    pkt -> length = sampleIndex;
+    memcpy(pkt -> values, itemsToGraph, graphIndex * sizeof(int16_t));
+    sendData(buffer, packetSize);
+
+    free(buffer); // clean up buffer
     memset(itemsToGraph, 0, sizeof(itemsToGraph));
     graphIndex = 0;
   }

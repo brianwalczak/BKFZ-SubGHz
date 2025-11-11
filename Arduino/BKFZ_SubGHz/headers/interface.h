@@ -9,7 +9,7 @@ void registerPlayRequest(std::function<void(std::function<void(bool)>)> handler)
 void registerPlay(std::function<void(const std::vector<int>&, int, const String&, const String&)> handler);
 void registerAnalyzer(std::function<void()> handler);
 void registerSettings(std::function<void(const String&, int, int)> handler);
-void sendData(const String &data);
+void sendData(const uint8_t* data, size_t length);
 void setupDevice();
 
 /* shared from main ino to interfaces */

@@ -11,6 +11,7 @@ static String receivedData = "";
 
   #include <headers/user_settings.h> // default user settings and their options
   #include <headers/globals.h> // global variables used across multiple files
+  #include <headers/packets.h>
 
   #define SERVICE_UUID "b1513422-2e10-4528-b293-39409019252f" // random service UUID
   #define TX_CHAR_UUID "cffa88bb-f8ac-423b-9031-0266d4f3aec1" // ESP32 to da app
@@ -118,14 +119,19 @@ static String receivedData = "";
                   }
                 }
 
-                DynamicJsonDocument responseDoc(MAX_SAMPLES + 1024);
-                responseDoc["url"] = "/record";
-                responseDoc["data"]["samples"] = result;
+                // get packet size, allocate buffer
+                const size_t packetSize = sizeof(RecordOut) + (sampleIndex * sizeof(int16_t));
+                uint8_t* buffer = (uint8_t*)malloc(packetSize);
+                if (!buffer) return;
 
-                String jsonString;
-                serializeJson(responseDoc, jsonString);
-                sendData(jsonString);
-                jsonString.clear(); // clean up json string
+                RecordOut* pkt = reinterpret_cast<RecordOut*>(buffer);
+                pkt -> p_len = packetSize;
+                pkt -> cmd = static_cast<uint8_t>(Command::RECORD);
+
+                memcpy(pkt -> samples, samples, sampleIndex * sizeof(int16_t));
+                sendData(buffer, packetSize);
+
+                free(buffer); // clean up buffer
                 flushSamples(); // flush the samples array once data was transmitted
               }
             }
@@ -148,13 +154,12 @@ static String receivedData = "";
                 reqSamples[i] = array[i].as<int>();
             }
 
-            DynamicJsonDocument confirmDoc(128);
-            confirmDoc["url"] = "/play";
-            confirmDoc["data"]["success"] = true;
+            PlayOut pkt;
+            pkt.p_len = sizeof(PlayOut);
+            pkt.cmd = static_cast<uint8_t>(Command::PLAY);
+            pkt.success = true;
 
-            String confirmString;
-            serializeJson(confirmDoc, confirmString);
-            sendData(confirmString);
+            sendData(reinterpret_cast<uint8_t*>(&pkt), sizeof(pkt));
 
             // Store old settings to revert when done
             String old_preset = settings.preset;
@@ -190,38 +195,33 @@ static String receivedData = "";
 
                 saveSettings(); // Save settings in non-volatile storage
             } else {
-                String setJSON = settingsToJson();
-                String setOptionsJSON = settingsOptionsToJson();
-                String statusJSON = statusToJson();
+                SettingsOut pkt;
+                pkt.p_len = sizeof(SettingsOut);
+                pkt.cmd = static_cast<uint8_t>(Command::SETTINGS);
 
-                DynamicJsonDocument confirmDoc(128);
-                confirmDoc["url"] = "/settings";
-                confirmDoc["data"]["settings"] = serialized(setJSON);
-                confirmDoc["data"]["options"] = serialized(setOptionsJSON);
-                confirmDoc["data"]["status"] = serialized(statusJSON);
+                strncpy(pkt.preset, settings.preset.c_str(), sizeof(pkt.preset)); // copy safely
+                pkt.preset[sizeof(pkt.preset) - 1] = '\0'; // ensure null-term
 
-                String confirmString;
-                serializeJson(confirmDoc, confirmString);
-                sendData(confirmString);
+                pkt.frequency = settings.frequency;
+                pkt.rssi = settings.rssi;
+                pkt.detect_rssi = settings.detect_rssi;
+                sendData(reinterpret_cast<uint8_t*>(&pkt), sizeof(pkt));
             }
         }
       }
     }
   };
 
-  void sendData(const String &data) {
-    String marked = (data + "\n"); // add \n to serve as the end marker
-
+  void sendData(const uint8_t* data, size_t length) {
     if (deviceConnected) {
       const int MTU_SIZE = BLEDevice::getMTU() - 5; // get negotiated MTU size minus overhead (will be capped at the maximum of 145 on iOS devices, and negotiated to 145 on Android devices)
-      int dataLen = marked.length();
       
-      for (int i = 0; i < dataLen; i += MTU_SIZE) {
-        int chunkSize = min(MTU_SIZE, dataLen - i);
-        String chunk = marked.substring(i, i + chunkSize);
-
-        pTxCharacteristic->setValue(chunk.c_str());
+      for (size_t i = 0; i < length; i += MTU_SIZE) {
+        int chunkSize = min(MTU_SIZE, (int)(length - i));
+        
+        pTxCharacteristic->setValue(data + i, chunkSize);
         pTxCharacteristic->notify();
+
         delay(10); // small delay to ensure data is sent properly
       }
     }
