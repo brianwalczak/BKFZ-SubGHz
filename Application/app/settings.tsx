@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { useGlobal } from "../providers/GlobalContext";
 import Back from "../components/back";
+import { settingsOptions } from "../providers/utils";
 
 const styles = StyleSheet.create({
   container: {
@@ -77,16 +78,16 @@ export default function Settings() {
   useEffect(() => {
     if (settings) {
       setPosition({
-        preset: (settings.options.preset.indexOf(settings.settings?.preset) || 0),
-        frequency: (settings.options.frequency.indexOf(settings.settings?.frequency) || 0),
-        rssi: (settings.options.rssi.indexOf(settings.settings?.rssi) || 0)
+        preset: (settingsOptions.preset.indexOf(settings.preset) || 0),
+        frequency: (settingsOptions.frequency.indexOf(settings.frequency) || 0),
+        rssi: (settingsOptions.rssi.indexOf(settings.rssi) || 0)
       });
     }
   }, [settings]);
 
   const handleMove = useCallback((key: string, dir: -1 | 1) => {
     setPosition((prev: any) => {
-      const max = settings.options[key].length - 1;
+      const max = settingsOptions[key].length - 1;
       let next = prev[key] + dir;
 
       if (next < 0) next = 0;
@@ -96,7 +97,7 @@ export default function Settings() {
   }, [settings]);
 
   const getDisplayValue = useCallback((key: string) => {
-    const val = settings.options[key][position[key]];
+    const val = settingsOptions[key][position[key]];
 
     if (key === "frequency") return (val / 1000000).toFixed(2) + " MHz";
     if (key === "rssi") return val === -200 ? "- - - - -" : val + " dBm";
@@ -105,9 +106,9 @@ export default function Settings() {
 
   const saveSettings = useCallback(async () => {
     const newSettings: any = {
-      preset: settings.options.preset[position.preset],
-      frequency: settings.options.frequency[position.frequency],
-      rssi: settings.options.rssi[position.rssi],
+      preset: settingsOptions.preset[position.preset],
+      frequency: settingsOptions.frequency[position.frequency],
+      rssi: settingsOptions.rssi[position.rssi],
     };
 
     const save = await updateSettings(newSettings, true);
@@ -132,7 +133,7 @@ export default function Settings() {
       <Text style={styles.title}>Settings</Text>
       <Text style={styles.subtitle}>Manage SubGHz settings and modulation.</Text>
 
-      {Object.keys(settings.options).map((key) => (
+      {Object.keys(settingsOptions).map((key) => (
         <View style={styles.optionRow} key={key}>
           <Text style={styles.label}>{key === "preset" ? "Preset" : key === "frequency" ? "Frequency" : key === 'rssi' ? "RSSI Threshold" : 'Unknown'}</Text>
           <TouchableOpacity style={[{ padding: 8 }, position[key] === 0 && { opacity: 0.3 }]} disabled={position[key] === 0} onPress={() => handleMove(key as any, -1)}>
@@ -141,7 +142,7 @@ export default function Settings() {
 
           <Text style={[styles.value, styles.selected]}>{getDisplayValue(key as any)}</Text>
 
-          <TouchableOpacity style={[{ padding: 8 }, position[key] === settings.options[key].length - 1 && { opacity: 0.3 }]} disabled={position[key] === settings.options[key].length - 1} onPress={() => handleMove(key as any, 1)}>
+          <TouchableOpacity style={[{ padding: 8 }, position[key] === settingsOptions[key].length - 1 && { opacity: 0.3 }]} disabled={position[key] === settingsOptions[key].length - 1} onPress={() => handleMove(key as any, 1)}>
             <Ionicons name="chevron-forward" size={24} color="#fff" />
           </TouchableOpacity>
         </View>

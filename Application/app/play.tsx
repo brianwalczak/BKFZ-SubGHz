@@ -95,7 +95,7 @@ export default function Play() {
     }
 
     const playing = registerEvent("/play", (res: any) => {
-      if (res.data?.success) {
+      if (res.success) {
         const duration = data.samples.reduce((acc, sample) => acc + Math.abs(sample) / 1000, 0); // each unit represents 1 microsecond
         const startTime = Date.now();
 

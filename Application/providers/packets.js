@@ -14,10 +14,8 @@ export const SettingsCmdOut = Object.freeze({
 });
 
 export const SettingsMethodCmdOut = Object.freeze({
-    SETTINGS: 0x01,
-    OPTIONS: 0x02,
-    STATUS: 0x03,
-    UPDATE: 0x04
+    GET: 0x01,
+    SET: 0x02
 });
 
 function readString(dv, offset, maxLen) {
@@ -42,7 +40,7 @@ function parseSettings(buffer) {
             preset: readString(dv, 3, 8), // start at byte 3, next 8 bytes
             frequency: dv.getUint32(11, true), // start at byte 11, read uint32
             rssi: dv.getInt8(15), // start at byte 15, read int8
-            detect_rssi: dv.getInt8(17) // start at byte 17, read int8
+            detect_rssi: dv.getInt8(16) // start at byte 16, read int8
         }
     };
 }

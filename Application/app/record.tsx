@@ -125,7 +125,7 @@ export default function Record() {
     const data = convertFile(output);
 
     const playing = registerEvent("/play", (res: any) => {
-      if (res.data?.success) {
+      if (res.success) {
         setPlayStatus('playing');
 
         let duration = 0;
@@ -156,18 +156,20 @@ export default function Record() {
 
   useEffect(() => {
     const callback = registerEvent("/record", (res: any) => {
-      if (res.data?.samples) {
-        setOutput(res.data.samples);
+      if (res.samples) {
+        setOutput(res.samples);
         setShowAfter(true);
       }
+    });
 
-      if (res.data?.length) {
-        setSampleCount(res.data.length);
+    const graph = registerEvent("/graph", (res: any) => {
+      if (res.length) {
+        setSampleCount(res.length);
       }
 
-      if (res.data?.graph) {
+      if (res.values) {
         setGraphData(prev => {
-          const newGraph = [...prev, ...res.data.graph];
+          const newGraph = [...prev, ...res.values];
 
           while (newGraph.length > (5000 / 10)) {
             newGraph.shift();
@@ -180,6 +182,7 @@ export default function Record() {
 
     return () => {
       callback?.remove();
+      graph?.remove();
     };
   }, []);
 
@@ -200,7 +203,7 @@ export default function Record() {
           <TouchableOpacity style={[styles.button, (recording ? { backgroundColor: "#dc3545" } : { backgroundColor: "#28a745" })]} activeOpacity={0.8} onPress={() => triggerRecording(!recording)}>
             <Text style={styles.buttonText}>{recording ? "Stop" : "Record"}</Text>
           </TouchableOpacity>
-          <Text style={styles.status}>{!settings?.settings ? 'Loading, please wait...' : `${settings.settings?.preset} | ${(settings.settings?.frequency / 1000000).toFixed(2)} MHz | ${settings.settings?.rssi.toString() === "-200" ? 'Any' : settings.settings?.rssi} RSSI`}</Text>
+          <Text style={styles.status}>{(!settings || !settings.preset || !settings.frequency || !settings.rssi) ? 'Loading, please wait...' : `${settings.preset} | ${(settings.frequency / 1000000).toFixed(2)} MHz | ${settings.rssi.toString() === "-200" ? 'Any' : settings.rssi} RSSI`}</Text>
 
           <View style={styles.graph}>
             {graphData.map((val, idx) => (

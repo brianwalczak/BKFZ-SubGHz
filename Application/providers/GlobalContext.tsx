@@ -11,7 +11,7 @@ const nameFilter = "BKFZ";
 const SERVICE_UUID = "b1513422-2e10-4528-b293-39409019252f";
 const TX_UUID = "cffa88bb-f8ac-423b-9031-0266d4f3aec1";
 const RX_UUID = "d4f3aec1-423b-9031-0266-cffa88bb1234";
-const receivedData: { [key: string]: string } = {};
+const receivedData: { [key: string]: { length: number | null, data: Uint8Array } } = {};
 let CHUNK_SIZE = 20;
 
 export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -317,29 +317,49 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                             btDataSub.current = BleManager.onDidUpdateValueForCharacteristic(async (data: any) => {
                                 if (data?.peripheral === device?.peripheral && data?.characteristic === TX_UUID) {
                                     try {
-                                        console.log('new data');
-                                        console.log(parsePacket(data.value));
-                                        let value = Buffer.from(data.value, 'base64').toString('utf8');
-                                        receivedData[data?.peripheral] = (receivedData[data?.peripheral] || '') + value;
-
-                                        if (receivedData[data?.peripheral].endsWith('\n')) {
-                                            value = receivedData[data?.peripheral].trim();
-                                            delete receivedData[data?.peripheral];
-                                        } else {
-                                            return; // wait for more data
+                                        if (!receivedData[data.peripheral]) {
+                                            receivedData[data.peripheral] = { length: null, data: new Uint8Array(0) };
                                         }
 
-                                        try {
-                                            const parsed = JSON.parse(value);
+                                        const entry = receivedData[data.peripheral];
+                                        const chunk = new Uint8Array(data.value);
 
-                                            if (parsed.url && dataCallbacks.current[parsed.url]) {
-                                                dataCallbacks.current[parsed.url].forEach(cb => cb(parsed));
+                                        // append new bytes together
+                                        const newBuffer = new Uint8Array(entry.data.length + chunk.length);
+                                        newBuffer.set(entry.data);
+                                        newBuffer.set(chunk, entry.data.length);
+                                        entry.data = newBuffer;
+
+                                        // if we're not expecting and have a header, save its length
+                                        if (entry.length === null && entry.data.length >= 2) {
+                                            const dv = new DataView(entry.data.buffer);
+                                            entry.length = dv.getUint16(0, true);
+                                        }
+
+                                        // if we're expecting and have a full packet, process it
+                                        while (entry.length !== null && entry.data.length >= entry.length) {
+                                            const packet = entry.data.slice(0, entry.length);
+
+                                            const parsed = parsePacket(packet.buffer);
+
+                                            if (parsed.page && dataCallbacks.current[parsed.page]) {
+                                                dataCallbacks.current[parsed.page].forEach(cb => cb(parsed.data));
                                             }
 
-                                            if (parsed?.url === "/settings") {
+                                            if (parsed?.page === "/settings") {
                                                 settingsRef.current = parsed.data || {};
                                             }
-                                        } catch { };
+
+                                            // slice off the packet by expected length
+                                            entry.data = entry.data.slice(entry.length);
+                                            entry.length = null;
+
+                                            // if we have leftover with a header, save its length
+                                            if (entry.data.length >= 2) {
+                                                const dv2 = new DataView(entry.data.buffer);
+                                                entry.length = dv2.getUint16(0, true);
+                                            }
+                                        }
                                     } catch { };
                                 }
                             });

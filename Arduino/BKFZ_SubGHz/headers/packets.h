@@ -18,10 +18,8 @@ enum class SettingsCmdIn : uint8_t {
 };
 
 enum class SettingsMethodCmdIn : uint8_t {
-  SETTINGS = 0x01,
-  OPTIONS = 0x02,
-  STATUS = 0x03,
-  UPDATE = 0x04
+  GET = 0x01,
+  SET = 0x02
 };
 
 struct SettingsIn {

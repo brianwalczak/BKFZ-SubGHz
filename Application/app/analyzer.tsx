@@ -92,20 +92,20 @@ export default function Analyzer() {
   }, []);
 
   useEffect(() => {
-    if (settings?.settings?.detect_rssi) {
-      setRssi(settings.settings.detect_rssi);
+    if (settings.detect_rssi) {
+      setRssi(settings.detect_rssi);
     }
   }, [settings]);
 
   useEffect(() => {
     const callback = registerEvent("/analyzer", (res: any) => {
-      if (res?.data?.freq && res?.data?.rssi) {
+      if (res.frequency && res.rssi) {
         if (currentFreq.current && currentRssi.current) {
-          setHistory((prev) => `Frequency: ${(res.data.freq / 1000000).toFixed(2) + ' MHz'} | RSSI: ${res.data.rssi} dBm\n` + prev);
+          setHistory((prev) => `Frequency: ${(res.frequency / 1000000).toFixed(2) + ' MHz'} | RSSI: ${res.rssi} dBm\n` + prev);
         }
 
-        currentFreq.current = res.data.freq;
-        currentRssi.current = res.data.rssi;
+        currentFreq.current = res.frequency;
+        currentRssi.current = res.rssi;
       }
     });
 
@@ -145,7 +145,7 @@ export default function Analyzer() {
       </View>
 
       <View>
-        <Text style={styles.status}>Settings: {settings?.settings?.preset || 'Loading...'} | {rssi} RSSI Threshold</Text>
+        <Text style={styles.status}>Settings: {settings.preset || 'Loading...'} | {rssi} RSSI Threshold</Text>
         <Slider style={styles.slider} minimumValue={-85} maximumValue={-40} step={5} value={rssi} minimumTrackTintColor="#28a745" maximumTrackTintColor="#888" thumbTintColor="#28a745" onValueChange={setRssi} onSlidingComplete={updateRSSI} />
       </View>
 
