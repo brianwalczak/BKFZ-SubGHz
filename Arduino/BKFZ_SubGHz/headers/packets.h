@@ -50,7 +50,7 @@ struct PlayIn {
   
   uint16_t count;
   uint32_t frequency;
-  char preset[16];
+  char preset[8];
   int16_t samples[];
 };
 
