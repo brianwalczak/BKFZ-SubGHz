@@ -284,7 +284,7 @@ void checkGraph() {
     pkt -> cmd = static_cast<uint8_t>(Command::GRAPH);
 
     pkt -> length = sampleIndex;
-    memcpy(pkt -> values, itemsToGraph, graphIndex * sizeof(int16_t));
+    for(int i = 0; i < graphIndex; i++) pkt->values[i] = (int16_t)itemsToGraph[i];
     sendData(buffer, packetSize);
 
     free(buffer); // clean up buffer

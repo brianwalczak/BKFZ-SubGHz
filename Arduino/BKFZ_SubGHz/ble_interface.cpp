@@ -128,7 +128,7 @@ static String receivedData = "";
                 pkt -> p_len = packetSize;
                 pkt -> cmd = static_cast<uint8_t>(Command::RECORD);
 
-                memcpy(pkt -> samples, samples, sampleIndex * sizeof(int16_t));
+                for(int i = 0; i < sampleIndex; i++) pkt->samples[i] = (int16_t)samples[i];
                 sendData(buffer, packetSize);
 
                 free(buffer); // clean up buffer
