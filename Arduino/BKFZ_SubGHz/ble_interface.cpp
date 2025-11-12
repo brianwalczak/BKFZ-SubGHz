@@ -92,33 +92,6 @@ static String receivedData = "";
                 smoothenSamples();
                 Serial.println(F("Recording has been successfully finished and samples have been smoothened."));
 
-                String prepend = "";
-                String presetName = settings.preset;
-                int freq_format = settings.frequency;
-                presetName.replace("AM270", "FuriHalSubGhzPresetOok270Async");
-                presetName.replace("AM650", "FuriHalSubGhzPresetOok650Async");
-                presetName.replace("FM238", "FuriHalSubGhzPreset2FSKDev238Async");
-                presetName.replace("FM476", "FuriHalSubGhzPreset2FSKDev238Async");
-
-                String result = "Filetype: Flipper SubGhz RAW File\nVersion: 1\n# Created with BKFZ SubGHz\nFrequency: " + String(freq_format) + "\nPreset: " + presetName + "\nProtocol: RAW\nRAW_Data: ";
-
-                if (samples[0] < 0) {
-                  for (int i = 0; i < sampleIndex - 1; ++i) {
-                    samples[i] = samples[i + 1];
-                  }
-                  sampleIndex--;
-                }
-
-                for (int i = 0; i < sampleIndex; ++i) {
-                  String valueToAdd = prepend + String(samples[i]);
-                  result += valueToAdd;
-                  prepend = " ";
-                  if ((i + 1) % 512 == 0) {
-                    result += "\nRAW_Data: ";
-                    prepend = "";
-                  }
-                }
-
                 // get packet size, allocate buffer
                 const size_t packetSize = sizeof(RecordOut) + (sampleIndex * sizeof(int16_t));
                 uint8_t* buffer = (uint8_t*)malloc(packetSize);
@@ -127,6 +100,10 @@ static String receivedData = "";
                 RecordOut* pkt = reinterpret_cast<RecordOut*>(buffer);
                 pkt -> p_len = packetSize;
                 pkt -> cmd = static_cast<uint8_t>(Command::RECORD);
+                pkt -> frequency = settings.frequency;
+
+                strncpy(pkt->preset, settings.preset.c_str(), sizeof(pkt->preset)); // copy safely
+                pkt->preset[sizeof(pkt->preset) - 1] = '\0'; // ensure null-term
 
                 for(int i = 0; i < sampleIndex; i++) pkt->samples[i] = (int16_t)samples[i];
                 sendData(buffer, packetSize);

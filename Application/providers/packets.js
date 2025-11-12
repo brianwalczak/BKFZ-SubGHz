@@ -61,17 +61,19 @@ function parseRecord(buffer) {
     const dv = new DataView(buffer);
 
     try {
-        const numSamples = (dv.getUint16(0, true) - 3) / 2; // get size of packet, subtract header, divide by 2 bytes (per sample)
+        const numSamples = (dv.getUint16(0, true) - 15) / 2; // get size of packet, subtract header + settings, divide by 2 bytes (per sample)
         const samples = [];
 
         for (let i = 0; i < numSamples; i++) {
-            samples.push(dv.getInt16(3 + i * 2, true));
+            samples.push(dv.getInt16(15 + i * 2, true));
         }
 
         return {
             page: '/record',
             data: {
                 success: true,
+                preset: readString(dv, 3, 8), // start at byte 3, next 8 bytes
+                frequency: dv.getUint32(11, true), // start at byte 11, read uint32
                 samples: samples
             }
         };

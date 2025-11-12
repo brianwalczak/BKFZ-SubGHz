@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useGlobal } from "../providers/GlobalContext";
-import { convertFile } from "../providers/utils";
+import { convertFile, convertSamples } from "../providers/utils";
 import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import Back from "../components/back";
@@ -156,8 +156,10 @@ export default function Record() {
 
   useEffect(() => {
     const callback = registerEvent("/record", (res: any) => {
-      if (res.samples) {
-        setOutput(res.samples);
+      if (res.preset && res.frequency && res.samples) {
+        const process = convertSamples(res.preset, res.frequency, res.samples);
+
+        setOutput(process);
         setShowAfter(true);
       }
     });

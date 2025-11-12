@@ -74,6 +74,8 @@ struct RecordOut {
   uint16_t p_len;
   uint8_t cmd;
 
+  char preset[8];
+  uint32_t frequency;
   int16_t samples[];
 };
 

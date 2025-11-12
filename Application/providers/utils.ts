@@ -37,6 +37,33 @@ export function convertFile(data: string) {
     };
 }
 
+export function convertSamples(preset: string, frequency: number, samples: number[]) {
+    let prepend = "";
+    preset = preset.replace("AM270", "FuriHalSubGhzPresetOok270Async");
+    preset = preset.replace("AM650", "FuriHalSubGhzPresetOok650Async");
+    preset = preset.replace("FM238", "FuriHalSubGhzPreset2FSKDev238Async");
+    preset = preset.replace("FM476", "FuriHalSubGhzPreset2FSKDev238Async");
+
+    let result = "Filetype: Flipper SubGhz RAW File\nVersion: 1\n# Created with BKFZ SubGHz\nFrequency: " + frequency.toString() + "\nPreset: " + preset + "\nProtocol: RAW\nRAW_Data: ";
+
+    if (samples[0] < 0) {
+        samples = samples.slice(1);
+    }
+
+    for (let i = 0; i < samples.length; i++) {
+        const valueToAdd = prepend + samples[i].toString();
+        result += valueToAdd;
+        prepend = " ";
+
+        if ((i + 1) % 512 === 0) {
+            result += "\nRAW_Data: ";
+            prepend = "";
+        }
+    }
+
+    return result;
+}
+
 // Reads file content from a given URI (local file path)
 export async function readFileContent(uri: string) {
     try {
