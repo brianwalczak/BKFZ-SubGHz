@@ -22,15 +22,7 @@
 
   // Simple function to inject settings w/ options in window (used for web server)
   String injectSettings() {
-    String setJSON = settingsToJson();
-    String setOptionsJSON = settingsOptionsToJson();
-    String statusJSON = statusToJson();
-
-    String setScript = "<script>window.settings = " + setJSON + "</script>";
-    String setOptionsScript = "<script>window.settings.options = " + setOptionsJSON + "</script>";
-    String statusScript = "<script>window.settings.status = " + statusJSON + "</script>";
-
-    return setScript + setOptionsScript + statusScript;
+    return "<script>window.settings = " + settingsToJson() + "</script>";
   }
 
   // Event handler for web sockets (mainly used for Frequency Analyzer as quick data transmission)

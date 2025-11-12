@@ -26,37 +26,6 @@ Status status = {
   "IDLE" // Recording (record)
 };
 
-// The available options for each setting (used to display on UI)
-SettingsOptions settingsOptions = {
-  { "AM270", "AM650", "FM238", "FM476"}, // Presets
-  { // Frequency
-    /* 300 - 348 */
-    300000000,
-    303875000,
-    304250000,
-    310000000,
-    315000000,
-    318000000,
-
-    /* 387 - 464 */
-    390000000,
-    418000000,
-    433075000,
-    433420000,
-    433920000,
-    434420000,
-    434775000,
-    438900000,
-
-    /* 779 - 928 */
-    868350000,
-    915000000,
-    925000000,
-  },
-  { -200, -85, -80, -75, -70, -65, -60, -55, -50, -45, -40 } // RSSI threshold
-};
-
-
 // Converts the user settings as a readable JSON string (courtesy of ChatGPT)
 String settingsToJson() {
   DynamicJsonDocument doc(256);
@@ -65,42 +34,6 @@ String settingsToJson() {
   doc["frequency"] = settings.frequency;
   doc["rssi"] = settings.rssi;
   doc["detect_rssi"] = settings.detect_rssi;
-
-  String jsonString;
-  serializeJson(doc, jsonString);
-  return jsonString;
-}
-
-// Converts the settings options as a readable JSON string (courtesy of ChatGPT, mainly used for displaying in /settings)
-String settingsOptionsToJson() {
-  DynamicJsonDocument doc(256);
-
-  JsonArray presets = doc.createNestedArray("preset");
-  for (String preset : settingsOptions.preset) {
-    presets.add(preset);
-  }
-
-  JsonArray frequencies = doc.createNestedArray("frequency");
-  for (int frequency : settingsOptions.frequency) {
-    frequencies.add(frequency);
-  }
-
-  JsonArray rssiThreshold = doc.createNestedArray("rssi");
-  for (int threshold : settingsOptions.rssi) {
-    rssiThreshold.add(threshold);
-  }
-
-  String jsonString;
-  serializeJson(doc, jsonString);
-  return jsonString;
-}
-
-// Converts the status as a readable value (courtesy of ChatGPT)
-String statusToJson() {
-  DynamicJsonDocument doc(128);
-
-  doc["detect"] = status.detect;
-  doc["record"] = status.record;
 
   String jsonString;
   serializeJson(doc, jsonString);

@@ -48,3 +48,33 @@ export async function readFileContent(uri: string) {
         return null;
     }
 }
+
+// The available options for each setting (used to display on UI)
+export const settingsOptions = {
+    preset: ["AM270", "AM650", "FM238", "FM476"], // Presets
+    frequency: [ // Frequency
+        /* 300 - 348 */
+        300000000,
+        303875000,
+        304250000,
+        310000000,
+        315000000,
+        318000000,
+
+        /* 387 - 464 */
+        390000000,
+        418000000,
+        433075000,
+        433420000,
+        433920000,
+        434420000,
+        434775000,
+        438900000,
+
+        /* 779 - 928 */
+        868350000,
+        915000000,
+        925000000,
+    ],
+    rssi: [-200, -85, -80, -75, -70, -65, -60, -55, -50, -45, -40] // RSSI threshold
+};
