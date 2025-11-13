@@ -39,6 +39,25 @@ https://github.com/user-attachments/assets/2cbcb2d0-29df-4d65-81d4-cca5f9d6b237
 
 ## Timeline
 
+### 11/12/2025
+- Added builder methods to send data in mobile app
+- Simplified data buffer storage in mobile app
+- Removed JSON from code, updated to read binary packets
+
+### 11/11/2025
+- Removed status and settings options JSON injection
+- Updated mobile app to use new data parser
+- Fixed minor bug with settings data
+- Fixed critical bug for samples and graphing data (remove `memcpy`)
+- Moved `.sub` file creation to be handled client-side
+- Made small adjustment to preset max length
+
+### 11/10/2025
+- Updated mobile app font to Roboto
+- Created new protocol structure in `packets.h`
+- Updated methods to send data w/ binary protocol
+- Added parser methods for incoming data in mobile app
+
 ### 11/05/2025
 - Created play page w/ file reading utility, fixed typos
 - Added progress percentage display when playing files
