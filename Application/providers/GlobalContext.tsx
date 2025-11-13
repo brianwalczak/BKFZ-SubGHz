@@ -10,7 +10,9 @@ const nameFilter = "BKFZ";
 const SERVICE_UUID = "b1513422-2e10-4528-b293-39409019252f";
 const TX_UUID = "cffa88bb-f8ac-423b-9031-0266d4f3aec1";
 const RX_UUID = "d4f3aec1-423b-9031-0266-cffa88bb1234";
-const receivedData: { [key: string]: { length: number | null, data: Uint8Array } } = {};
+
+let dataLength: number = 0;
+let dataBuffer: Uint8Array = new Uint8Array(0);
 let CHUNK_SIZE = 20;
 
 export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -308,6 +310,8 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                     if (deviceName && deviceName.includes(nameFilter)) {
                         setBtConnected(device?.peripheral); // register for connects
                         CHUNK_SIZE = 20; // reset chunk size on new connection
+                        dataLength = 0; // reset expected data length
+                        dataBuffer = new Uint8Array(0); // reset data buffer
 
                         try {
                             await BleManager.retrieveServices(device?.peripheral);
@@ -324,28 +328,23 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                             btDataSub.current = BleManager.onDidUpdateValueForCharacteristic(async (data: any) => {
                                 if (data?.peripheral === device?.peripheral && data?.characteristic === TX_UUID) {
                                     try {
-                                        if (!receivedData[data.peripheral]) {
-                                            receivedData[data.peripheral] = { length: null, data: new Uint8Array(0) };
-                                        }
-
-                                        const entry = receivedData[data.peripheral];
                                         const chunk = new Uint8Array(data.value);
 
                                         // append new bytes together
-                                        const newBuffer = new Uint8Array(entry.data.length + chunk.length);
-                                        newBuffer.set(entry.data);
-                                        newBuffer.set(chunk, entry.data.length);
-                                        entry.data = newBuffer;
+                                        const newBuffer = new Uint8Array(dataBuffer.length + chunk.length);
+                                        newBuffer.set(dataBuffer);
+                                        newBuffer.set(chunk, dataBuffer.length);
+                                        dataBuffer = newBuffer;
 
                                         // if we're not expecting and have a header, save its length
-                                        if (entry.length === null && entry.data.length >= 2) {
-                                            const dv = new DataView(entry.data.buffer);
-                                            entry.length = dv.getUint16(0, true);
+                                        if (dataLength === 0 && dataBuffer.length >= 2) {
+                                            const dv = new DataView(dataBuffer.buffer);
+                                            dataLength = dv.getUint16(0, true);
                                         }
 
                                         // if we're expecting and have a full packet, process it
-                                        while (entry.length !== null && entry.data.length >= entry.length) {
-                                            const packet = entry.data.slice(0, entry.length);
+                                        while (dataLength !== 0 && dataBuffer.length >= dataLength) {
+                                            const packet = dataBuffer.slice(0, dataLength);
 
                                             const parsed = parsePacket(packet.buffer);
 
@@ -358,13 +357,13 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                                             }
 
                                             // slice off the packet by expected length
-                                            entry.data = entry.data.slice(entry.length);
-                                            entry.length = null;
+                                            dataBuffer = dataBuffer.slice(dataLength);
+                                            dataLength = 0;
 
                                             // if we have leftover with a header, save its length
-                                            if (entry.data.length >= 2) {
-                                                const dv2 = new DataView(entry.data.buffer);
-                                                entry.length = dv2.getUint16(0, true);
+                                            if (dataBuffer.length >= 2) {
+                                                const dv2 = new DataView(dataBuffer.buffer);
+                                                dataLength = dv2.getUint16(0, true);
                                             }
                                         }
                                     } catch { };
