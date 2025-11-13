@@ -1,5 +1,4 @@
 #include <ELECHOUSE_CC1101_SRC_DRV.h>
-#include <ArduinoJson.h>
 #include <esp_attr.h>
 #include <Arduino.h>
 #include <SPI.h>

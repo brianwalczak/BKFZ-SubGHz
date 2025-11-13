@@ -3,8 +3,7 @@ import { EventSubscription, Platform } from "react-native";
 import { request, check, PERMISSIONS, RESULTS } from "react-native-permissions";
 import BleManager, { BleState } from 'react-native-ble-manager';
 import { usePathname, useRouter } from "expo-router";
-import { parsePacket } from './packets.js';
-import { Buffer } from 'buffer';
+import { buildPacket, parsePacket } from './packets.js';
 const GlobalContext = createContext<any>(undefined);
 const nameFilter = "BKFZ";
 
@@ -156,13 +155,15 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }, [permissions, btInit, btConnected, disconnectDevice]);
 
     // send JSON data to the connected device over BLE
-    const sendData = useCallback(async (json: object) => {
+    const sendData = useCallback(async (payload: { page: string, data: object }) => {
         if (!btConnected) return false;
 
         try {
-            const buffer = Buffer.from(JSON.stringify(json) + '\n', 'utf8'); // add \n to serve as the end marker
+            const packet = buildPacket(payload.page, payload.data);
+            console.log("Sending packet:", packet);
+            console.log(Array.from(packet));
 
-            await BleManager.write(btConnected, SERVICE_UUID, RX_UUID, buffer.toJSON().data, CHUNK_SIZE);
+            await BleManager.write(btConnected, SERVICE_UUID, RX_UUID, Array.from(packet), CHUNK_SIZE);
             return true;
         } catch (err) {
             return false;
@@ -177,7 +178,13 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             (settingsRef.current as any).settings = { ...oldSettings, ...newSettings };
 
             if (request) {
-                return await sendData({ url: "/settings", data: { update: true, ...newSettings } });
+                return await sendData({
+                    page: "/settings",
+                    data: {
+                        method: 'set',
+                        payload: Object.keys(newSettings).map(key => ({ key: key, value: newSettings[key] }))
+                    }
+                });
             }
         }
 
@@ -364,7 +371,10 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                                 }
                             });
 
-                            await BleManager.write(device?.peripheral, SERVICE_UUID, RX_UUID, Buffer.from(JSON.stringify({ url: "/settings", data: { update: false } }) + '\n', 'utf8').toJSON().data, CHUNK_SIZE); // request current settings
+                            // request current settings
+                            await BleManager.write(device?.peripheral, SERVICE_UUID, RX_UUID, Array.from(buildPacket("/settings", {
+                                method: 'get'
+                            })), CHUNK_SIZE);
                         } catch {
                             await disconnectDevice(); // disconnect if notification setup fails
                         }

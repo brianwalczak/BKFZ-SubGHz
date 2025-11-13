@@ -129,12 +129,12 @@ export default function Play() {
     });
 
     sendData({
-      url: "/play",
+      page: "/play",
       data: {
-        samples: JSON.stringify(data.samples),
-        frequency: data.frequency,
         length: data.samples.length,
-        preset: data.preset
+        frequency: data.frequency,
+        preset: data.preset,
+        samples: data.samples
       }
     });
 

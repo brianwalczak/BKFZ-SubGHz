@@ -81,14 +81,7 @@ export default function Analyzer() {
   const currentRssi = React.useRef<number | null>(null);
 
   const updateRSSI = useCallback(async (value: number) => {
-    await updateSettings({ detect_rssi: value }, false); // update the setting locally only
-
-    return sendData({
-      url: "/analyzer",
-      data: {
-        rssi: value
-      }
-    });
+    await updateSettings({ detect_rssi: value }, true); // update the setting and send to device
   }, []);
 
   useEffect(() => {
@@ -110,7 +103,7 @@ export default function Analyzer() {
     });
 
     sendData({
-      url: "/analyzer",
+      page: "/analyzer",
       data: {
         active: true
       }
@@ -119,7 +112,7 @@ export default function Analyzer() {
     return () => {
       callback?.remove();
       sendData({
-        url: "/analyzer",
+        page: "/analyzer",
         data: {
           active: false
         }

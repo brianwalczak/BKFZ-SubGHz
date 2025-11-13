@@ -93,8 +93,10 @@ export default function Record() {
     setRecording(start);
 
     sendData({
-      url: "/record",
-      data: { "active": (start) }
+      page: "/record",
+      data: {
+        active: start
+      }
     });
   }, [sendData]);
 
@@ -142,12 +144,12 @@ export default function Record() {
     });
 
     sendData({
-      url: "/play",
+      page: "/play",
       data: {
-        samples: JSON.stringify(data.samples),
-        frequency: data.frequency,
         length: data.samples.length,
-        preset: data.preset
+        frequency: data.frequency,
+        preset: data.preset,
+        samples: data.samples
       }
     });
 

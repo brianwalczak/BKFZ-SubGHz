@@ -48,7 +48,7 @@ struct PlayIn {
   uint16_t p_len;
   uint8_t cmd;
   
-  uint16_t count;
+  uint16_t length;
   uint32_t frequency;
   char preset[8];
   int16_t samples[];

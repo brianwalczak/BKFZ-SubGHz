@@ -1,3 +1,5 @@
+// -- Builders -- //
+
 export const Command = Object.freeze({
     SETTINGS: 0x01,
     ANALYZER: 0x02,
@@ -17,6 +19,125 @@ export const SettingsMethodCmdOut = Object.freeze({
     GET: 0x01,
     SET: 0x02
 });
+
+function encodeSettings(payload) {
+    const parsed = [];
+
+    for (const { key, value } of payload) {
+        let cmd = key === 'preset' ? SettingsCmdOut.SETTING_PRESET
+            : key === 'frequency' ? SettingsCmdOut.SETTING_FREQUENCY
+            : key === 'rssi' ? SettingsCmdOut.SETTING_RSSI
+            : key === 'detect_rssi' ? SettingsCmdOut.SETTING_DETECT_RSSI
+            : null;
+        if (cmd === null) continue;
+        parsed.push(cmd);
+
+        if (typeof value === "string") {
+            const enc = new TextEncoder();
+            const bytes = enc.encode(value);
+
+            parsed.push(...bytes, 0);
+        } else if (typeof value === "number") {
+            const dv = new DataView(new ArrayBuffer(4));
+            dv.setUint32(0, value, true);
+
+            parsed.push(...new Uint8Array(dv.buffer));
+        } else if (typeof value === "boolean") {
+            parsed.push(value ? 1 : 0);
+        } else if (value instanceof Uint8Array) {
+            parsed.push(...value);
+        }
+    }
+
+    return new Uint8Array(parsed);
+}
+
+function encodeSamples(samples) {
+    const buffer = new ArrayBuffer(samples.length * 2); // int16_t = 2 bytes
+    const dv = new DataView(buffer);
+
+    samples.forEach((sample, index) => {
+        dv.setInt16(index * 2, sample, true);
+    });
+
+    return new Uint8Array(buffer);
+}
+
+function buildSettings({ method, payload = null }) {
+    let dataBytes = new Uint8Array(0);
+    method = method === 'set' ? SettingsMethodCmdOut.SET : SettingsMethodCmdOut.GET;
+
+    if (method === SettingsMethodCmdOut.SET && payload) {
+        dataBytes = encodeSettings(payload);
+    }
+
+    const totalLength = 2 + 1 + 1 + dataBytes.length; // p_len, cmd, method, data (if exists ofc)
+    const buffer = new ArrayBuffer(totalLength);
+    const dv = new DataView(buffer);
+    let offset = 0;
+
+    dv.setUint16(offset, totalLength, true);
+    offset += 2;
+    
+    dv.setUint8(offset++, Command.SETTINGS);
+    dv.setUint8(offset++, method);
+
+    const final = new Uint8Array(buffer);
+    final.set(dataBytes, offset);
+    return final;
+}
+
+function buildActivity(type, { active }) { // record AND play
+    let dataBytes = new Uint8Array(0);
+
+    const totalLength = 2 + 1 + 1; // p_len, cmd, active
+    const buffer = new ArrayBuffer(totalLength);
+    const dv = new DataView(buffer);
+    let offset = 0;
+
+    dv.setUint16(offset, totalLength, true);
+    offset += 2;
+    
+    dv.setUint8(offset++, type);
+    dv.setUint8(offset++, (active ? 1 : 0));
+
+    const final = new Uint8Array(buffer);
+    final.set(dataBytes, offset);
+    return final;
+}
+
+function buildPlay({ length, frequency, preset, samples }) {
+    const sampleBytes = encodeSamples(samples);
+
+    const totalLength = 2 + 1 + 2 + 4 + 8 + sampleBytes.length; // p_len, cmd, length, frequency, preset, samples
+    const buffer = new ArrayBuffer(totalLength);
+    const dv = new DataView(buffer);
+    let offset = 0;
+
+    dv.setUint16(offset, totalLength, true);
+    offset += 2;
+    
+    dv.setUint8(offset++, Command.PLAY);
+
+    dv.setUint16(offset, length, true);
+    offset += 2;
+
+    dv.setUint32(offset, frequency, true);
+    offset += 4;
+
+    const enc = new TextEncoder();
+    const padded = new Uint8Array(8);
+    padded.set(enc.encode(preset).slice(0, 7)); // ensure null-term
+
+    const final = new Uint8Array(buffer);
+    final.set(padded, offset);
+    offset += 8;
+
+    final.set(sampleBytes, offset);
+    return final;
+}
+
+// -- Parsers -- //
 
 function readString(dv, offset, maxLen) {
     let str = "";
@@ -122,6 +243,13 @@ const parsers = {
     [Command.GRAPH]: parseGraph
 };
 
+const builders = {
+    ["/settings"]: buildSettings,
+    ["/analyzer"]: (data) => buildActivity(Command.ANALYZER, data),
+    ["/record"]: (data) => buildActivity(Command.RECORD, data),
+    ["/play"]: buildPlay
+};
+
 export function parsePacket(buffer) {
     try {
         if (Array.isArray(buffer)) {
@@ -137,4 +265,9 @@ export function parsePacket(buffer) {
         console.error(error);
         return null;
     }
+}
+
+export function buildPacket(type, data) {
+    const builder = builders[type];
+    return builder ? builder(data) : null;
 }
