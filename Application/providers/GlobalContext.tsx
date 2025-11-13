@@ -156,14 +156,12 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         }
     }, [permissions, btInit, btConnected, disconnectDevice]);
 
-    // send JSON data to the connected device over BLE
+    // send data to the connected device over BLE
     const sendData = useCallback(async (payload: { page: string, data: object }) => {
         if (!btConnected) return false;
 
         try {
             const packet = buildPacket(payload.page, payload.data);
-            console.log("Sending packet:", packet);
-            console.log(Array.from(packet));
 
             await BleManager.write(btConnected, SERVICE_UUID, RX_UUID, Array.from(packet), CHUNK_SIZE);
             return true;

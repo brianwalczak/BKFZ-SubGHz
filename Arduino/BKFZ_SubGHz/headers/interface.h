@@ -17,6 +17,6 @@ void flushSamples();
 void stopRecording();
 void startRecording();
 void smoothenSamples();
-void playSignal(const int *samples, int length);
+void playSignal(const int16_t reqSamples[], uint16_t reqLength);
 
 #endif

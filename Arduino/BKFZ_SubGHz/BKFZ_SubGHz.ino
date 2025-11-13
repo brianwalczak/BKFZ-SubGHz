@@ -115,12 +115,12 @@ void frequencyAnalyzer() {
 }
 
 // Play a signal from client-side file
-void playSignal(const int reqSamples[], int reqLength) {
+void playSignal(const int16_t reqSamples[], uint16_t reqLength) {
   Serial.println(F("Now transmitting requested samples..."));
   setupCC1101(true);
 
   // Transmit all of the sample data
-  for (int i = 0; i < reqLength; i++) {
+  for (uint16_t i = 0; i < reqLength; i++) {
     if (reqSamples[i] > 0) {
       digitalWrite(GDO0_CPIN, HIGH);
     } else {

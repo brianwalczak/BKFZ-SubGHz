@@ -1,12 +1,12 @@
 #include "headers/interface.h"
 #include <headers/config.h> // used to configure basic variables (such as pinout, max samples, etc.)
-static String receivedData = "";
+static uint16_t dataLength = 0;
+static std::vector<uint8_t> dataBuffer;
 
 #if CONNECTION_MODE == CONNECTION_MODE_BLE
   #include <BLEDevice.h>
   #include <BLEUtils.h>
   #include <BLEServer.h>
-  #include <ArduinoJson.h>
   #include <BLE2902.h>
 
   #include <headers/user_settings.h> // default user settings and their options
@@ -45,42 +45,36 @@ static String receivedData = "";
 
   class RxCallbacks: public BLECharacteristicCallbacks {
     void onWrite(BLECharacteristic *pCharacteristic) {
-      String data = pCharacteristic->getValue().c_str();
-      receivedData += data;
+      const uint8_t* payload = pCharacteristic->getData();
+      size_t payloadLen = pCharacteristic->getLength();
 
-      if (receivedData.endsWith("\n")) {
-        receivedData.trim();
-        data = receivedData;
+      // append new bytes together
+      dataBuffer.insert(dataBuffer.end(), payload, payload + payloadLen);
 
-        receivedData = "";
-      } else {
-        return; // wait for more data
+      // if we're not expecting and have a header, save its length
+      if (dataLength == 0 && dataBuffer.size() >= 2) {
+        dataLength = (dataBuffer[0] | (dataBuffer[1] << 8));
       }
-      
-      if (data.length() > 0) {
-        DynamicJsonDocument doc(MAX_SAMPLES + 1024);
-        deserializeJson(doc, data);
-        JsonObject dataObject = doc["data"]; // Extract the data provided
 
-        if (doc["url"] == "/analyzer") {
-            if (dataObject.containsKey("rssi")) {
-              settings.detect_rssi = dataObject["rssi"].as<int>();
-              Serial.println(F("Updated detect_rssi to "));
-              Serial.print(String(settings.detect_rssi));
-            }
+      // if we're expecting and have a full packet, process it
+      while (dataLength != 0 && dataBuffer.size() >= dataLength) {
+        std::vector<uint8_t> packet(dataBuffer.begin(), dataBuffer.begin() + dataLength);
 
-            if (dataObject.containsKey("active")) {
-                if (dataObject["active"] == true) {
-                    status.detect = "QUEUED";
-                } else if (dataObject["active"] == false) {
-                     status.detect = "IDLE";
-                }
-            }
-        }
+        // do stuff with the packet here
+        uint16_t p_len = packet[0] | (packet[1] << 8); // extract packet length (2 bytes)
+        uint8_t cmd = packet[2]; // extract command (1 byte)
 
-        if (doc["url"] == "/record") {
-            if (dataObject.containsKey("active")) {
-              if (dataObject["active"] == true) {
+        switch (static_cast<Command>(cmd)) {
+          case Command::ANALYZER: {
+              const AnalyzerIn* data = reinterpret_cast<const AnalyzerIn*>(packet.data());
+              
+              status.detect = (data->active == 1) ? "QUEUED" : "IDLE";
+              break;
+          }
+          case Command::RECORD: {
+              const RecordIn* data = reinterpret_cast<const RecordIn*>(packet.data());
+
+              if (data->active == 1) {
                 Serial.println(F("Recording has been successfully started with user settings."));
                 startRecording();
               } else { 
@@ -111,54 +105,41 @@ static String receivedData = "";
                 free(buffer); // clean up buffer
                 flushSamples(); // flush the samples array once data was transmitted
               }
-            }
-        }
-        
-        if (doc["url"] == "/play") {
-          if (dataObject.containsKey("samples") && dataObject.containsKey("frequency") && dataObject.containsKey("length") && dataObject.containsKey("preset")) {
-            flushSamples(); // free up memory
-
-            String samples = dataObject["samples"].as<String>();
-            int reqLength = dataObject["length"].as<int>();
-            std::vector<int> reqSamples(reqLength);
-
-            // Reconstruct samples array from response
-            DynamicJsonDocument doc(MAX_SAMPLES + 1024);
-            deserializeJson(doc, samples);
-            JsonArray array = doc.as<JsonArray>();
-
-            for (int i = 0; i < reqLength && i < array.size(); i++) {
-                reqSamples[i] = array[i].as<int>();
-            }
-
-            PlayOut pkt;
-            pkt.p_len = sizeof(PlayOut);
-            pkt.cmd = static_cast<uint8_t>(Command::PLAY);
-            pkt.success = true;
-
-            sendData(reinterpret_cast<uint8_t*>(&pkt), sizeof(pkt));
-
-            // Store old settings to revert when done
-            String old_preset = settings.preset;
-            int old_freq = settings.frequency;
-
-            // Update settings to new data
-            settings.preset = dataObject["preset"].as<String>();
-            settings.frequency = dataObject["frequency"].as<int>();
-            Serial.println(F("Now playing file requested by user, successfully updated to file settings."));
-
-            playSignal(reqSamples.data(), reqLength);
-
-            Serial.println(F("Successfully played file requested, reverting back to old settings."));
-            // Revert settings back to original
-            settings.preset = old_preset;
-            settings.frequency = old_freq;
+              break;
           }
-        }
+          case Command::PLAY: {
+              const PlayIn* data = reinterpret_cast<const PlayIn*>(packet.data());
+              flushSamples(); // free up memory
 
-        if (doc["url"] == "/settings") {            
-            if (dataObject.containsKey("update") && dataObject["update"] == true) {
-                if (dataObject.containsKey("preset")) {
+              PlayOut pkt;
+              pkt.p_len = sizeof(PlayOut);
+              pkt.cmd = static_cast<uint8_t>(Command::PLAY);
+              pkt.success = true;
+
+              sendData(reinterpret_cast<uint8_t*>(&pkt), sizeof(pkt));
+
+              // Store old settings to revert when done
+              String old_preset = settings.preset;
+              int old_freq = settings.frequency;
+
+              // Update settings to new data
+              settings.preset = String(data->preset);
+              settings.frequency = data->frequency;
+              Serial.println(F("Now playing file requested by user, successfully updated to file settings."));
+
+              playSignal(data->samples, data->length);
+
+              Serial.println(F("Successfully played file requested, reverting back to old settings."));
+              // Revert settings back to original
+              settings.preset = old_preset;
+              settings.frequency = old_freq;
+              break;
+          }
+          case Command::SETTINGS: {
+              const SettingsIn* data = reinterpret_cast<const SettingsIn*>(packet.data());
+
+              if (data->method == static_cast<uint8_t>(SettingsMethodCmdIn::SET)) {
+                /*if (dataObject.containsKey("preset")) {
                     settings.preset = dataObject["preset"].as<String>();
                 }
 
@@ -170,20 +151,35 @@ static String receivedData = "";
                     settings.rssi = dataObject["rssi"].as<int>();
                 }
 
-                saveSettings(); // Save settings in non-volatile storage
-            } else {
-                SettingsOut pkt;
-                pkt.p_len = sizeof(SettingsOut);
-                pkt.cmd = static_cast<uint8_t>(Command::SETTINGS);
+                saveSettings(); // Save settings in non-volatile storage*/
+                Serial.println("Settings are being updated. must fix!");
+              } else {
+                  SettingsOut pkt;
+                  pkt.p_len = sizeof(SettingsOut);
+                  pkt.cmd = static_cast<uint8_t>(Command::SETTINGS);
 
-                strncpy(pkt.preset, settings.preset.c_str(), sizeof(pkt.preset)); // copy safely
-                pkt.preset[sizeof(pkt.preset) - 1] = '\0'; // ensure null-term
+                  strncpy(pkt.preset, settings.preset.c_str(), sizeof(pkt.preset)); // copy safely
+                  pkt.preset[sizeof(pkt.preset) - 1] = '\0'; // ensure null-term
 
-                pkt.frequency = settings.frequency;
-                pkt.rssi = settings.rssi;
-                pkt.detect_rssi = settings.detect_rssi;
-                sendData(reinterpret_cast<uint8_t*>(&pkt), sizeof(pkt));
-            }
+                  pkt.frequency = settings.frequency;
+                  pkt.rssi = settings.rssi;
+                  pkt.detect_rssi = settings.detect_rssi;
+                  sendData(reinterpret_cast<uint8_t*>(&pkt), sizeof(pkt));
+              }
+              break;
+          }
+          default:
+              Serial.println(F("Received unknown command via bluetooth, it may have experienced packet loss. :("));
+              break;
+        }
+
+        // slice off the packet by expected length
+        dataBuffer.erase(dataBuffer.begin(), dataBuffer.begin() + dataLength);
+        dataLength = 0;
+
+        // if we have leftover with a header, save its length
+        if (dataBuffer.size() >= 2) {
+          dataLength = (dataBuffer[0] | (dataBuffer[1] << 8));
         }
       }
     }
