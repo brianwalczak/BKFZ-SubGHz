@@ -136,13 +136,13 @@ export default function Settings() {
       {Object.keys(settingsOptions).map((key) => (
         <View style={styles.optionRow} key={key}>
           <Text style={styles.label}>{key === "preset" ? "Preset" : key === "frequency" ? "Frequency" : key === 'rssi' ? "RSSI Threshold" : 'Unknown'}</Text>
-          <TouchableOpacity style={[{ padding: 8 }, position[key] === 0 && { opacity: 0.3 }]} disabled={position[key] === 0} onPress={() => handleMove(key as any, -1)}>
+          <TouchableOpacity style={[{ padding: 8 }, position[key] === 0 && { opacity: 0.3 }]} disabled={position[key] === 0} onPress={() => handleMove(key, -1)}>
             <Ionicons name="chevron-back" size={24} color="#fff" />
           </TouchableOpacity>
 
-          <Text style={[styles.value, styles.selected]}>{getDisplayValue(key as any)}</Text>
+          <Text style={[styles.value, styles.selected]}>{getDisplayValue(key)}</Text>
 
-          <TouchableOpacity style={[{ padding: 8 }, position[key] === settingsOptions[key].length - 1 && { opacity: 0.3 }]} disabled={position[key] === settingsOptions[key].length - 1} onPress={() => handleMove(key as any, 1)}>
+          <TouchableOpacity style={[{ padding: 8 }, position[key] === settingsOptions[key].length - 1 && { opacity: 0.3 }]} disabled={position[key] === settingsOptions[key].length - 1} onPress={() => handleMove(key, 1)}>
             <Ionicons name="chevron-forward" size={24} color="#fff" />
           </TouchableOpacity>
         </View>
