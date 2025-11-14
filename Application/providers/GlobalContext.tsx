@@ -212,7 +212,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
         if (!permissions || btConnected || !btInit) return;
 
-        BleManager.scan([], 15, false).then(() => {
+        BleManager.scan({ serviceUUIDs: [], seconds: 15, allowDuplicates: false }).then(() => {
             startScanSub.current = BleManager.onDiscoverPeripheral((device: any) => {
                 const data = { name: (device?.name || device?.advertising?.localName || null), id: device?.id };
                 if (!data.name?.includes(nameFilter)) return; // only show BKFZ devices
