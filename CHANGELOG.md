@@ -30,7 +30,7 @@
 
 ## 📱 App Demo (Bluetooth)
 
-https://github.com/user-attachments/assets/7d80933a-fae2-44cf-a396-04a467863631
+https://github.com/user-attachments/assets/b6bdef06-8ae8-4c16-bf7c-1fd887ece572
 
 ## 🌐 Web Demo (WiFi / Access Point)
 
