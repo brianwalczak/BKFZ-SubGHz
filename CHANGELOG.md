@@ -41,8 +41,10 @@ https://github.com/user-attachments/assets/2cbcb2d0-29df-4d65-81d4-cca5f9d6b237
 ## Timeline
 
 ### 11/13/2025
-- Updated code to properly update settings values.
-- Fixed mobile app to update settings locally.
+- Updated code to properly update settings values
+- Fixed mobile app to update settings locally
+- Remove unused imports, fix dependency arrays
+- Fix Bluetooth scanning with new refactored API
 
 ### 11/12/2025
 - Added builder methods to send data in mobile app
