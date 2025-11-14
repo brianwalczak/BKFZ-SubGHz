@@ -17,14 +17,14 @@
 - [x] Update presets to better match Flipper Zero
 - [x] Fix configuration file structures
 - [x] Add an option for no RSSI threshold
-- [ ] Major code reconstruction to minimize memory usage
-- [ ] Make small UI improvements client-side
-- [ ] Improve storage system (maybe device storage?)
-- [ ] Make improvements for WiFi-based connection (`.html` pages)
 - [x] Remove JSON and create custom protocol
 - [x] Fix page animation to use back motion properly
 - [x] Test functionality on iOS devices, make changes
 - [x] Create new revamped icons and assets
+- [ ] Major code reconstruction to minimize memory usage
+- [ ] Make small UI improvements client-side
+- [ ] Improve storage system (maybe device storage?)
+- [ ] Make improvements for WiFi-based connection (`.html` pages)
 
 ---
 
