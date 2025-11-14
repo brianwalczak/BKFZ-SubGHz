@@ -82,7 +82,7 @@ export default function Analyzer() {
 
   const updateRSSI = useCallback(async (value: number) => {
     await updateSettings({ detect_rssi: value }, true); // update the setting and send to device
-  }, []);
+  }, [updateSettings]);
 
   useEffect(() => {
     if (settings.detect_rssi) {
@@ -118,7 +118,7 @@ export default function Analyzer() {
         }
       });
     };
-  }, []);
+  }, [registerEvent, sendData]);
 
   if (!settings) return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>

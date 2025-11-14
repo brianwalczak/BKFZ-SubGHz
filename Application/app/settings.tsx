@@ -94,7 +94,7 @@ export default function Settings() {
       if (next > max) next = max;
       return { ...prev, [key]: next };
     });
-  }, [settings]);
+  }, []);
 
   const getDisplayValue = useCallback((key: string) => {
     const val = settingsOptions[key][position[key]];
@@ -102,7 +102,7 @@ export default function Settings() {
     if (key === "frequency") return (val / 1000000).toFixed(2) + " MHz";
     if (key === "rssi") return val === -200 ? "- - - - -" : val + " dBm";
     return val;
-  }, [position, settings]);
+  }, [position]);
 
   const saveSettings = useCallback(async () => {
     const newSettings: any = {
@@ -119,7 +119,7 @@ export default function Settings() {
     }
 
     setTimeout(() => setMessage(null), 2000);
-  }, [position, settings]);
+  }, [position, setMessage, updateSettings]);
 
   if (!settings || !position) return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>

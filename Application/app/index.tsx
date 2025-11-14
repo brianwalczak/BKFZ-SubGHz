@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -73,7 +73,7 @@ export default function Index() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <Text style={styles.title}>Welcome! Let's Connect.</Text>
+            <Text style={styles.title}>Welcome! Let&apos;s Connect.</Text>
             <View style={styles.content}>
                 <View style={styles.iconRow}>
                     <MaterialIcons name="bluetooth" size={150} color={'#3B82F6'} />

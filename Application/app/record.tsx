@@ -154,7 +154,7 @@ export default function Record() {
     });
 
     setPlayStatus('waiting');
-  }, [output, sendData]);
+  }, [output, sendData, registerEvent]);
 
   useEffect(() => {
     const callback = registerEvent("/record", (res: any) => {
@@ -188,7 +188,7 @@ export default function Record() {
       callback?.remove();
       graph?.remove();
     };
-  }, []);
+  }, [registerEvent]);
 
   if (!settings) return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>

@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TouchableOpacity, ScrollView, View, ActivityIndicator, Animated } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, ScrollView, View, Animated } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useGlobal } from "../providers/GlobalContext";
 import { convertFile, readFileContent } from "../providers/utils";
@@ -72,7 +72,7 @@ export default function Play() {
       duration: 100,
       useNativeDriver: false
     }).start();
-  }, [progress]);
+  }, [animatedProgress, progress]);
 
   useEffect(() => {
     return () => {
@@ -145,7 +145,7 @@ export default function Play() {
 
     animatedProgress.setValue(0);
     setProgress(0);
-  }, [sendData]);
+  }, [animatedProgress, registerEvent, sendData]);
 
   const updateFiles = useCallback(async () => {
     try {
