@@ -85,7 +85,7 @@ export default function Analyzer() {
   }, [updateSettings]);
 
   useEffect(() => {
-    if (settings.detect_rssi) {
+    if (settings?.detect_rssi) {
       setRssi(settings.detect_rssi);
     }
   }, [settings]);
@@ -138,7 +138,7 @@ export default function Analyzer() {
       </View>
 
       <View>
-        <Text style={styles.status}>Settings: {settings.preset || 'Loading...'} | {rssi} RSSI Threshold</Text>
+        <Text style={styles.status}>Settings: {settings?.preset || 'Loading...'} | {rssi} RSSI Threshold</Text>
         <Slider style={styles.slider} minimumValue={-85} maximumValue={-40} step={5} value={rssi} minimumTrackTintColor="#28a745" maximumTrackTintColor="#888" thumbTintColor="#28a745" onValueChange={setRssi} onSlidingComplete={updateRSSI} />
       </View>
 

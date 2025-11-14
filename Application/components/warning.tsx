@@ -59,7 +59,7 @@ const activity = {
 
 interface Props {
     reason?: (keyof typeof activity);
-    icon?: string;
+    icon?: React.ComponentProps<typeof MaterialIcons>['name'];
 }
 
 function openSettings() {
@@ -93,7 +93,7 @@ function closeApplication() {
 export default function Warning({ reason = 'permissions', icon = 'bluetooth-disabled' }: Props) {
     return (
         <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1 }}>
-            <MaterialIcons name={icon as any} size={60} color={activity[reason].primaryColor} />
+            <MaterialIcons name={icon} size={60} color={activity[reason].primaryColor} />
             <Text style={styles.title}>{activity[reason].title}</Text>
             <Text style={styles.subtitle}>{activity[reason].subtitle}</Text>
 

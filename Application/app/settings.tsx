@@ -76,7 +76,7 @@ export default function Settings() {
   const [position, setPosition] = useState<any>(null);
 
   useEffect(() => {
-    if (settings) {
+    if (settings && settings?.preset && settings?.frequency && settings?.rssi) {
       setPosition({
         preset: (settingsOptions.preset.indexOf(settings.preset) || 0),
         frequency: (settingsOptions.frequency.indexOf(settings.frequency) || 0),
@@ -97,6 +97,8 @@ export default function Settings() {
   }, []);
 
   const getDisplayValue = useCallback((key: string) => {
+    if (!position) return "";
+
     const val = settingsOptions[key][position[key]];
 
     if (key === "frequency") return (val / 1000000).toFixed(2) + " MHz";
@@ -105,6 +107,8 @@ export default function Settings() {
   }, [position]);
 
   const saveSettings = useCallback(async () => {
+    if (!position) return;
+    
     const newSettings: any = {
       preset: settingsOptions.preset[position.preset],
       frequency: settingsOptions.frequency[position.frequency],

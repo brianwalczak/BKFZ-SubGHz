@@ -2,9 +2,9 @@ import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { TouchableOpacity } from "react-native";
 import { Feather } from '@expo/vector-icons';
-import { useRouter } from "expo-router";
+import { Href, useRouter } from "expo-router";
 
-export default function Back({ action, location = null, force = false }: { action: 'back' | 'go', location?: string | null, force?: boolean }) {
+export default function Back({ action, location = null, force = false }: { action: 'back' | 'go', location?: Href | null, force?: boolean }) {
     const router = useRouter();
 
     return (
@@ -14,9 +14,9 @@ export default function Back({ action, location = null, force = false }: { actio
                     router.back();
                 } else if (action === 'go' && location) {
                     if (force) {
-                        router.replace(location as any);
+                        router.replace(location);
                     } else {
-                        router.push(location as any);
+                        router.push(location);
                     }
                 }
             }}>

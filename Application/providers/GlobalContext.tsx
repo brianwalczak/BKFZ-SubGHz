@@ -29,7 +29,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const btConnectSub = React.useRef<EventSubscription | null>(null);
     const btDisconnectSub = React.useRef<EventSubscription | null>(null);
     const btDataSub = React.useRef<EventSubscription | null>(null);
-    const settingsRef = React.useRef<{}>(null);
+    const settingsRef = React.useRef<{ [key: string]: any }>(null);
     const router = useRouter();
     const pathname = usePathname();
 
@@ -171,11 +171,10 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }, [btConnected]);
 
     const updateSettings = useCallback(async (newSettings: { [key: string]: any }, request: boolean = false) => {
-        const oldSettings = (settingsRef.current || {}) as { [key: string]: any };
-        const hasChanges = Object.keys(newSettings).some(key => newSettings[key] !== oldSettings[key]);
+        const hasChanges = Object.keys(newSettings).some(key => newSettings[key] !== settingsRef.current?.[key]);
 
         if (hasChanges) {
-            settingsRef.current = { ...oldSettings, ...newSettings };
+            settingsRef.current = { ...(settingsRef.current || {}), ...newSettings };
 
             if (request) {
                 return await sendData({
@@ -351,7 +350,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                                             }
 
                                             if (parsed?.page === "/settings") {
-                                                settingsRef.current = parsed.data || {};
+                                                settingsRef.current = parsed?.data || null;
                                             }
 
                                             // slice off the packet by expected length
