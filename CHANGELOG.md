@@ -20,7 +20,8 @@
 - [ ] Major code reconstruction to minimize memory usage
 - [ ] Make small UI improvements client-side
 - [ ] Improve storage system (maybe device storage?)
-- [ ] Remove JSON and create custom protocol
+- [ ] Make improvements for WiFi-based connection (`.html` pages)
+- [x] Remove JSON and create custom protocol
 - [x] Fix page animation to use back motion properly
 - [x] Test functionality on iOS devices, make changes
 - [x] Create new revamped icons and assets
@@ -38,6 +39,10 @@ https://github.com/user-attachments/assets/2cbcb2d0-29df-4d65-81d4-cca5f9d6b237
 ---
 
 ## Timeline
+
+### 11/13/2025
+- Updated code to properly update settings values.
+- Fixed mobile app to update settings locally.
 
 ### 11/12/2025
 - Added builder methods to send data in mobile app

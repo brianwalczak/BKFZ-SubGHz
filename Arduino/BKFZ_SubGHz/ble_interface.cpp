@@ -137,22 +137,60 @@ static std::vector<uint8_t> dataBuffer;
           }
           case Command::SETTINGS: {
               const SettingsIn* data = reinterpret_cast<const SettingsIn*>(packet.data());
+              const uint8_t* ptr = data->data;
+              const uint8_t* end = packet.data() + data->p_len;
 
+              // written mostly by Copilot and slightly modified, I had no idea how to do this lol..
               if (data->method == static_cast<uint8_t>(SettingsMethodCmdIn::SET)) {
-                /*if (dataObject.containsKey("preset")) {
-                    settings.preset = dataObject["preset"].as<String>();
+                while (ptr < end) {
+                  uint8_t key = *ptr++; // first byte = setting key type
+                  
+                  switch (static_cast<SettingsCmdIn>(key)) {
+                    case SettingsCmdIn::SETTING_PRESET: {
+                      char text[8]; // we're expecting max 8 bytes
+                      uint8_t i = 0;
+
+                      while (ptr < end && i < 7 && *ptr != 0) { // check null-term
+                          text[i++] = *ptr++; // copy character, increment by 1 byte
+                      }
+                      text[i] = '\0'; // ensure null-term
+
+                      if (ptr < end) ptr++; // skip null-term if present
+                      settings.preset = String(text);
+                      break;
+                    }
+                    case SettingsCmdIn::SETTING_FREQUENCY: {
+                      if (ptr + 4 <= end) {
+                          uint32_t freq;
+                          memcpy(&freq, ptr, 4); // read uint32_t
+                          
+                          settings.frequency = freq;
+                          ptr += 4; // uint32_t is 4 bytes
+                      }
+
+                      break;
+                    }
+                    case SettingsCmdIn::SETTING_RSSI: {
+                      if (ptr < end) {
+                          settings.rssi = (int8_t)*ptr++; // int8_t is 1 byte
+                      }
+
+                      break;
+                    }
+                    case SettingsCmdIn::SETTING_DETECT_RSSI: {
+                      if (ptr < end) {
+                          settings.detect_rssi = (int8_t)*ptr++; // int8_t is 1 byte
+                      }
+
+                      break;
+                    }
+                    default:
+                      ptr = end;
+                      break;
+                  }
                 }
 
-                if (dataObject.containsKey("frequency")) {
-                    settings.frequency = dataObject["frequency"].as<int>();
-                }
-
-                if (dataObject.containsKey("rssi")) {
-                    settings.rssi = dataObject["rssi"].as<int>();
-                }
-
-                saveSettings(); // Save settings in non-volatile storage*/
-                Serial.println("Settings are being updated. must fix!");
+                saveSettings(); // Save settings in non-volatile storage
               } else {
                   SettingsOut pkt;
                   pkt.p_len = sizeof(SettingsOut);

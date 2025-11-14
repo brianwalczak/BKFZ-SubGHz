@@ -171,11 +171,11 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }, [btConnected]);
 
     const updateSettings = useCallback(async (newSettings: { [key: string]: any }, request: boolean = false) => {
-        const oldSettings = (settingsRef.current as any)?.settings || {};
+        const oldSettings = (settingsRef.current || {}) as { [key: string]: any };
         const hasChanges = Object.keys(newSettings).some(key => newSettings[key] !== oldSettings[key]);
 
         if (hasChanges) {
-            (settingsRef.current as any).settings = { ...oldSettings, ...newSettings };
+            settingsRef.current = { ...oldSettings, ...newSettings };
 
             if (request) {
                 return await sendData({
