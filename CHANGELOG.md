@@ -42,6 +42,7 @@ https://github.com/user-attachments/assets/2cbcb2d0-29df-4d65-81d4-cca5f9d6b237
 
 ### 11/14/2025
 - Fix bugs and type safety for settings, add null checks
+- Remove unused dependencies from `package.json`
 
 ### 11/13/2025
 - Updated code to properly update settings values
