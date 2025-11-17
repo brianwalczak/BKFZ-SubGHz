@@ -3,20 +3,18 @@
 #include <Arduino.h>
 #include <SPI.h>
 
-#include <headers/config.h> // used to configure basic variables (such as pinout, max samples, etc.)
-#include <headers/presets.h> // contains all presets w/ their settings
-#include <headers/user_settings.h> // default user settings and their options
-#include <headers/interface.h> // interface for play, analyzer, settings, websockets, etc.
-#include <headers/globals.h> // global variables used across multiple files
+#include <headers/config.h>
+#include <headers/presets.h>
+#include <headers/user_settings.h>
+#include <headers/interface.h>
+#include <headers/globals.h>
 #include <headers/packets.h>
 
-int samples[MAX_SAMPLES];
-int tempSmooth[MAX_SAMPLES];
+int16_t samples[MAX_SAMPLES];
 volatile int sampleIndex = 0;
 volatile unsigned long lastTime = 0;
 
-// -- Recording Graph Data -- //
-int itemsToGraph[1024];
+int16_t itemsToGraph[1024];
 bool graphUpdateNeeded = false;
 volatile int graphSkipped = 0;
 volatile int graphIndex = -1;
@@ -51,7 +49,7 @@ void setupCC1101(bool transmit, int retry = false) {
 
 // Enables receiver mode and records RAW samples
 void startRecording() {
-  setupCC1101(false); // Initizalize CC1101 with receiver mode
+  setupCC1101(false); // Initialize CC1101 with receiver mode
   status.record = "RUNNING";
   
   // Update all of the pins and setup interrupt
@@ -65,13 +63,12 @@ void stopRecording() {
   status.record = "IDLE";
 }
 
-// Capture and analyze nearby frequencies w/ RSSI
-
+// Captures and analyzes nearby frequencies w/ RSSI
 void frequencyAnalyzer() {
   status.detect = "RUNNING";
   Serial.println(F("Frequency analyzer has been started by the user (watch for websockets)."));
 
-  // Store old settings to revert when done and last seen frequency/RSSI
+  // Store old settings to revert when done and last seen frequency / RSSI
   int old_freq = settings.frequency;
   int lastFrequency = 0;
   int lastRSSI = 0;
@@ -84,7 +81,7 @@ void frequencyAnalyzer() {
       settings.frequency = frequency; // Update to hopper frequency
       setupCC1101(false);
 
-      int rssi = ELECHOUSE_cc1101.getRssi(); // Get the current RSSI
+      int rssi = ELECHOUSE_cc1101.getRssi();
 
       // This signal is stronger than the one before and within threshold
       if(rssi >= highestRssi && rssi >= settings.detect_rssi) {
@@ -109,7 +106,7 @@ void frequencyAnalyzer() {
     }
   }
 
-  // Revert settings back to original and run setup
+  // Revert settings back to original before
   settings.frequency = old_freq;
   Serial.println(F("Frequency analyzer has been stopped by the user."));
 }
@@ -119,18 +116,18 @@ void playSignal(const int16_t reqSamples[], uint16_t reqLength) {
   Serial.println(F("Now transmitting requested samples..."));
   setupCC1101(true);
 
-  // Transmit all of the sample data
   for (uint16_t i = 0; i < reqLength; i++) {
     if (reqSamples[i] > 0) {
       digitalWrite(GDO0_CPIN, HIGH);
     } else {
       digitalWrite(GDO0_CPIN, LOW);
     }
+
     delayMicroseconds(abs(reqSamples[i]));
   }
 }
 
-// Smoothens out the RAW samples to correct format (not written by me!)
+// Smoothens out the RAW samples to correct format (written with generative AI)
 void smoothenSamples() {
   #define signalstorage 10
   
@@ -235,25 +232,21 @@ void smoothenSamples() {
       lastbin = !lastbin;
 
       // Assign positive for high and negative for low
-      tempSmooth[smoothCount] = (lastbin ? 1 : -1) * (calculate * timingdelay[0]);
+      samples[smoothCount] = (lastbin ? 1 : -1) * (calculate * timingdelay[0]);
       smoothCount++;
     }
   }
 
-  // Output smoothed data
-  memset(samples, 0, sizeof(samples)); // Clear just the sample array
-  sampleIndex = smoothCount; // Update sample index to smoothed count
-  for (int i = 0; i < smoothCount; i++) {
-    samples[i] = tempSmooth[i];
-  } 
+  // update sample index to ignore stale data
+  sampleIndex = smoothCount;
 }
 
+// Flushes all recorded samples and resets variables
 void flushSamples() {
   int oldHeap = ESP.getFreeHeap();
   int oldStack = uxTaskGetStackHighWaterMark(NULL) * sizeof(StackType_t);
 
   memset(samples, 0, sizeof(samples)); // flush sample array
-  memset(tempSmooth, 0, sizeof(tempSmooth)); // flush temporary smoothened array
   sampleIndex = 0;
   lastTime = 0;
   
@@ -269,8 +262,9 @@ void flushSamples() {
   Serial.println("[FLUSH]: sample flush success, " + String(newHeap - oldHeap) + " heap regained + " + String(newStack - oldStack) + " stack regained.");
 }
 
+// Checks if graph needs to be updated (and sends data)
 void checkGraph() {
-  if(micros() - lastSend > 100000 && graphIndex >= 1) { // the last time it was updated was >100ms ago
+  if(micros() - lastSend > 100000 && graphIndex >= 1) { // last update >100ms ago
     lastSend = micros();
 
     // get packet size, allocate buffer
@@ -296,7 +290,7 @@ void checkGraph() {
 void onSignalChange() {
   const unsigned long time = micros();
   const unsigned int duration = time - lastTime;
-  int rssi = ELECHOUSE_cc1101.getRssi(); // Get the current RSSI
+  int rssi = ELECHOUSE_cc1101.getRssi();
 
   if (sampleIndex < MAX_SAMPLES && (rssi >= settings.rssi || settings.rssi == -200)) {
     samples[sampleIndex++] = duration;

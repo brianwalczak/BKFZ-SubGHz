@@ -4,13 +4,12 @@
 #include "config.h"
 
 // ---- Sample Recording Data ---- //
-extern int samples[MAX_SAMPLES];
-extern int tempSmooth[MAX_SAMPLES];
+extern int16_t samples[MAX_SAMPLES];
 extern volatile int sampleIndex;
 extern volatile unsigned long lastTime;
 
 // ---- Graph Recording Data ---- //
-extern int itemsToGraph[1024];
+extern int16_t itemsToGraph[1024];
 extern bool graphUpdateNeeded;
 extern volatile int graphSkipped;
 extern volatile int graphIndex;

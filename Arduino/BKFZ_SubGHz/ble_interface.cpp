@@ -1,5 +1,5 @@
 #include "headers/interface.h"
-#include <headers/config.h> // used to configure basic variables (such as pinout, max samples, etc.)
+#include <headers/config.h>
 static uint16_t dataLength = 0;
 static std::vector<uint8_t> dataBuffer;
 
@@ -9,8 +9,8 @@ static std::vector<uint8_t> dataBuffer;
   #include <BLEServer.h>
   #include <BLE2902.h>
 
-  #include <headers/user_settings.h> // default user settings and their options
-  #include <headers/globals.h> // global variables used across multiple files
+  #include <headers/user_settings.h>
+  #include <headers/globals.h>
   #include <headers/packets.h>
 
   #define SERVICE_UUID "b1513422-2e10-4528-b293-39409019252f" // random service UUID
@@ -239,7 +239,12 @@ static std::vector<uint8_t> dataBuffer;
   }
 
   void setupDevice() {
-    BLEDevice::init("BKFZ SubGHz");
+    String devName = DEVICE_NAME;
+    if (devName.indexOf("BKFZ") == -1) {
+      devName = devName + " (BKFZ)";
+    }
+
+    BLEDevice::init(devName.c_str()); // use custom device name
 
     // Devices running iOS < 10 will request an MTU size of 158. Newer devices running iOS 10 will request an MTU size of 185.
     // https://stackoverflow.com/questions/41977767/negotiate-ble-mtu-on-ios/42336001

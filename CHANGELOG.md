@@ -21,7 +21,7 @@
 - [x] Fix page animation to use back motion properly
 - [x] Test functionality on iOS devices, make changes
 - [x] Create new revamped icons and assets
-- [ ] Major code reconstruction to minimize memory usage
+- [x] Minor code reconstruction to minimize memory usage
 - [ ] Make small UI improvements client-side
 - [ ] Improve storage system (maybe device storage?)
 - [ ] Make improvements for WiFi-based connection (`.html` pages)
