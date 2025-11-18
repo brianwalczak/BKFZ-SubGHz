@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
 });
 
 export default function Play() {
-  const [files, setFiles] = useState<{ name: string | null; uri: string; isFlipper: boolean }[]>([]);
+  const [files, setFiles] = useState<{ name: string | null; uri: string; file?: File, isFlipper: boolean }[]>([]);
   const [playStatus, setPlayStatus] = useState<{ status: string; uri: string; } | null>(null);
   const [progress, setProgress] = useState<number>(0);
   const animatedProgress = useRef(new Animated.Value(0)).current;
@@ -83,8 +83,8 @@ export default function Play() {
     };
   }, []);
 
-  const playFile = useCallback(async (uri: string) => {
-    const fileText = await readFileContent(uri);
+  const playFile = useCallback(async (uri: string, file?: File) => {
+    const fileText = await readFileContent(file ?? uri);
     if (!fileText) return;
 
     const data = convertFile(fileText);
@@ -159,7 +159,7 @@ export default function Play() {
 
         // .sub is a native file for the Flipper Zero, but is also used here
         if (fileExtension && (fileExtension === 'SUB' || fileExtension === 'SUB.TXT')) {
-          let fileText = await readFileContent(file.uri);
+          let fileText = await readFileContent(file.file ?? file.uri);
           if (!fileText) return;
 
           const lines = fileText.split("\n");
@@ -175,6 +175,7 @@ export default function Play() {
           return setFiles(prev => [...prev, {
             name: file.name,
             uri: file.uri,
+            file: file.file ?? undefined,
             isFlipper: isFlipper
           }]);
         }
@@ -199,12 +200,12 @@ export default function Play() {
       ) : (
         <>
           <ScrollView style={{ width: '100%' }} contentContainerStyle={{ alignItems: "center" }}>
-            {files.map((file: { name: string | null; uri: string; isFlipper: boolean }) => (
+            {files.map((file: { name: string | null; uri: string; file?: File; isFlipper: boolean }) => (
               <View key={file.uri} style={{ width: '100%', padding: 30, paddingBottom: 25, marginVertical: 15, borderRadius: 20, backgroundColor: "#2b2b2b" }}>
                 <Text style={{ fontSize: 18, color: "#fff", fontFamily: 'Press Start 2P', marginBottom: 8, alignSelf: "center" }} numberOfLines={1}>{file.name?.split(".")[0]}</Text>
                 <Text style={{ fontSize: 12, color: "#fff", fontFamily: 'Press Start 2P', marginBottom: 8, alignSelf: "center" }} numberOfLines={1}>{file.isFlipper ? "Flipper" : "Native"} SubGhz RAW File</Text>
 
-                <TouchableOpacity style={[styles.button, { backgroundColor: "#28a745", marginTop: 20, width: '100%', paddingVertical: 20, alignSelf: "center", overflow: 'hidden', position: 'relative' }]} activeOpacity={0.8} onPress={() => playFile(file.uri)} disabled={playStatus !== null}>
+                <TouchableOpacity style={[styles.button, { backgroundColor: "#28a745", marginTop: 20, width: '100%', paddingVertical: 20, alignSelf: "center", overflow: 'hidden', position: 'relative' }]} activeOpacity={0.8} onPress={() => playFile(file.uri, file?.file)} disabled={playStatus !== null}>
                   {playStatus?.uri === file.uri && playStatus?.status === 'playing' && (
                     <Animated.View
                       style={{

@@ -1,4 +1,4 @@
-import { File } from 'expo-file-system';
+import * as FileSystem from 'expo-file-system';
 
 // Converts files into a readable sample format
 export function convertFile(data: string) {
@@ -65,12 +65,33 @@ export function convertSamples(preset: string, frequency: number, samples: numbe
 }
 
 // Reads file content from a given URI (local file path)
-export async function readFileContent(uri: string) {
+export async function readFileContent(file: string | File): Promise<string | null> {
     try {
-        const file = new File(uri);
-        const text = await file.text();
+        if (file instanceof File) {
+            // https://www.reddit.com/r/reactnative/comments/z4uhb1/comment/msiv84w/
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
 
-        return text;
+                reader.onload = e => {
+                    if (e.target?.result && typeof e.target.result === 'string') {
+                        resolve(e.target.result);
+                    } else {
+                        reject(null);
+                    }
+                };
+
+                reader.onerror = () => {
+                    reject(null);
+                };
+
+                reader.readAsText(file);
+            });
+        } else {
+            const f = new FileSystem.File(file);
+            const text = await f.text();
+
+            return text;
+        }
     } catch (error) {
         return null;
     }
