@@ -1,6 +1,6 @@
 import React from "react";
 import { TouchableOpacity, Linking, Platform, Text, View, StyleSheet, BackHandler } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 const styles = StyleSheet.create({
     title: {

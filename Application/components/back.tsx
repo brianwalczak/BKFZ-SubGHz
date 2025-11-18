@@ -1,7 +1,7 @@
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { TouchableOpacity } from "react-native";
-import { Feather } from '@expo/vector-icons';
+import Feather from "@expo/vector-icons/Feather";
 import { Href, useRouter } from "expo-router";
 
 export default function Back({ action, location = null, force = false }: { action: 'back' | 'go', location?: Href | null, force?: boolean }) {

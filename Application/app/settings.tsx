@@ -1,7 +1,7 @@
 import { StyleSheet, Text, TouchableOpacity, View, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useEffect, useState, useCallback } from "react";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { useGlobal } from "../providers/GlobalContext";
 import Back from "../components/back";
 import { settingsOptions } from "../providers/utils";
