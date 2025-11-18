@@ -2,7 +2,7 @@ import { StyleSheet, Text, TouchableOpacity, ScrollView, View, Animated } from "
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useGlobal } from "../providers/GlobalContext";
 import { convertFile, readFileContent } from "../providers/utils";
-import { pick } from '@react-native-documents/picker';
+import * as DocumentPicker from 'expo-document-picker';
 import Back from "../components/back";
 import { useCallback, useEffect, useState, useRef } from "react";
 
@@ -149,12 +149,11 @@ export default function Play() {
 
   const updateFiles = useCallback(async () => {
     try {
-      const data = await pick({
-        mode: 'open',
-        allowMultiSelection: true
+      const reader = await DocumentPicker.getDocumentAsync({
+        multiple: true
       });
 
-      data.forEach(async file => {
+      (reader?.assets || []).forEach(async file => {
         const fileExtension = file?.name?.toUpperCase()?.split('.')?.slice(1)?.join('.');
         let isFlipper = true;
 
