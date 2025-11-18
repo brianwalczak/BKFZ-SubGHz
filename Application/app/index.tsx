@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import Feather from "@expo/vector-icons/Feather";
 import ESP32 from "../assets/svg/esp32";
 import { useRouter } from "expo-router";
 
@@ -76,7 +76,7 @@ export default function Index() {
             <Text style={styles.title}>Welcome! Let&apos;s Connect.</Text>
             <View style={styles.content}>
                 <View style={styles.iconRow}>
-                    <MaterialIcons name="bluetooth" size={150} color={'#3B82F6'} />
+                    <Feather name="bluetooth" size={130} color={'#3B82F6'} style={{ marginRight: 10 }} />
                     <ESP32 width={200} />
                 </View>
                 <Text style={styles.subtitle}>Turn on your BKFZ SubGHz to enable Bluetooth connection.</Text>
