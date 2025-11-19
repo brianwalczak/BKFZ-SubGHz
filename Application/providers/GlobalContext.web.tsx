@@ -46,17 +46,13 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             setIsConnected(true);
             console.log("WebSocket connected");
 
-            await sendData({
-                page: "/settings",
-                data: {
-                    method: 'get'
-                }
-            });
+            ws.current?.send(buildPacket("/settings", { method: 'get' }));
         };
 
-        ws.current.onmessage = function (event) {
+        ws.current.onmessage = async function (event) {
             try {
-                const chunk = new Uint8Array(JSON.parse(event.data));
+                const buffer = await event.data.arrayBuffer();
+                const chunk = new Uint8Array(buffer);
 
                 if (chunk.length >= 2) {
                     const parsed = parsePacket(chunk.buffer);
@@ -84,7 +80,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         try {
             const packet = buildPacket(payload.page, payload.data);
 
-            ws.current?.send(JSON.stringify(packet));
+            ws.current?.send(packet);
             return true;
         } catch (err) {
             return false;
