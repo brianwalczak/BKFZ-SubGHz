@@ -1,7 +1,7 @@
-const brotli = require('brotli');
+const zlib = require('zlib');
 const fs = require('fs');
 const path = require('path');
-const extensions = ['.html', '.ttf', '.js'];
+const extensions = ['.html', '.ttf', '.json', '.js'];
 
 async function collFiles(dir) {
     let files = [];
@@ -31,7 +31,7 @@ async function collFiles(dir) {
 
     for (const filePath of filePaths) {
         console.log(`\x1b[33mCompressing file: ${filePath}\x1b[0m`);
-        const data = brotli.compress(fs.readFileSync(filePath));
+        const data = zlib.gzipSync(fs.readFileSync(filePath));
 
         const relative = path.relative('./dist', filePath);
         const dir = path.join('./web', path.dirname(relative));
@@ -46,7 +46,7 @@ async function collFiles(dir) {
             continue;
         }
 
-        fs.writeFileSync(path.join(dir, path.basename(filePath) + '.br'), data);
+        fs.writeFileSync(path.join(dir, path.basename(filePath) + '.gz'), data);
     }
 
     console.log('\x1b[32mAll files compressed successfully.\x1b[0m');
