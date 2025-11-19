@@ -8,10 +8,14 @@ export default function Back({ action, location = null, force = false }: { actio
     const router = useRouter();
 
     return (
-        <SafeAreaView style={{ position: "absolute", left: 15, top: 10 }}>
+        <SafeAreaView style={{ position: "absolute", left: 15, top: 10, display: (action === 'back' && !router.canGoBack() && !(typeof window !== 'undefined' && window.history.length > 1)) ? "none" : undefined }}>
             <TouchableOpacity onPress={() => {
                 if (action === 'back') {
-                    router.back();
+                    if (router.canGoBack()) {
+                        router.back();
+                    } else if(typeof window !== 'undefined' && window.history.length > 1) {
+                        window.history.back();
+                    }
                 } else if (action === 'go' && location) {
                     if (force) {
                         router.replace(location);
