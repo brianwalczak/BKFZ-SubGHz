@@ -38,7 +38,7 @@ export default function RootLayout() {
     (async () => {
       await Font.loadAsync({
         "Roboto": require("../assets/fonts/Roboto.ttf"),
-        "Press Start 2P": require("../assets/fonts/Press_Start_2P.ttf")
+        "Press_Start_2P": require("../assets/fonts/Press_Start_2P.ttf")
       });
       setLoaded(true);
     })();

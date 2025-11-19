@@ -14,7 +14,7 @@ const styles = StyleSheet.create({
     paddingVertical: 100
   },
   title: {
-    fontFamily: "Press Start 2P",
+    fontFamily: "Press_Start_2P",
     color: "#fff",
     fontSize: 20,
     textAlign: "center",
