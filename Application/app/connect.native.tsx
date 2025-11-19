@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
     }
 });
 
-export default function Index() {
+export default function Connect() {
     const { permissions, btState, devices, connectDevice } = useGlobal();
     const [connectingId, setConnectingId] = useState<string | null>(null);
 
