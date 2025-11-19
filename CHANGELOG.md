@@ -25,6 +25,7 @@
 - [ ] Make small UI improvements client-side
 - [ ] Improve storage system (maybe device storage?)
 - [ ] Make improvements for WiFi-based connection (`.html` pages)
+- [ ] Update `README.md` to improve instructions and clarity
 
 ---
 
