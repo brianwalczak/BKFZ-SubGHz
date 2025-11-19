@@ -112,9 +112,9 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }, [sendData]);
 
     useEffect(() => {
-        if (isConnected && (pathname === "/" || pathname === "/connect")) {
+        if (isConnected && pathname === "/") {
             router.replace("/home"); // navigate to home page
-        } else if (!isConnected && (pathname !== "/" && pathname !== "/connect")) {
+        } else if (!isConnected && pathname !== "/") {
             router.replace("/"); // start connection flow again
         }
     }, [isConnected, pathname, router]);
