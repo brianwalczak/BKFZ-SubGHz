@@ -37,7 +37,7 @@
 
         break;
       case WS_EVT_ERROR:
-        Serial.printf("WebSocket error: %s\n", (char*)arg);
+        Serial.printf("[WS]: unknown error - %s\n", (char*)arg);
         break;
       case WS_EVT_DATA: {
         std::vector<uint8_t> packet(data, data + len);
@@ -55,16 +55,16 @@
               const RecordIn* data = reinterpret_cast<const RecordIn*>(packet.data());
 
               if (data->active == 1) {
-                Serial.println(F("Recording has been successfully started with user settings."));
+                Serial.println(F("[RECORD]: Recording session initiated (RX)..."));
                 startRecording();
               } else { 
                 stopRecording();
-                Serial.print(F("Found "));
+                Serial.print(F("[RECORD]: Recording session ended, processing samples... "));
                 Serial.print(String(sampleIndex));
-                Serial.print(F(" RAW samples, smoothing needed."));
+                Serial.println(F(" RAW samples, smoothing needed."));
                 delay(100);
                 smoothenSamples();
-                Serial.println(F("Recording has been successfully finished and samples have been smoothened."));
+                Serial.println(F("[RECORD]: Samples processed, response sent to client."));
 
                 // get packet size, allocate buffer
                 const size_t packetSize = sizeof(RecordOut) + (sampleIndex * sizeof(int16_t));
@@ -105,11 +105,9 @@
               // Update settings to new data
               settings.preset = String(data->preset);
               settings.frequency = data->frequency;
-              Serial.println(F("Now playing file requested by user, successfully updated to file settings."));
 
               playSignal(data->samples, data->length);
 
-              Serial.println(F("Successfully played file requested, reverting back to old settings."));
               // Revert settings back to original
               settings.preset = old_preset;
               settings.frequency = old_freq;
@@ -187,7 +185,7 @@
               break;
           }
           default:
-              Serial.println(F("Received unknown command via bluetooth, it may have experienced packet loss. :("));
+              Serial.println(F("[WS]: Received unknown command, check your connection stability."));
               break;
         }
 
@@ -238,7 +236,7 @@
     server.addHandler(&ws);
     server.begin();
 
-    Serial.println(F("The web server is ready with an IP address of "));
+    Serial.print(F("[WiFi]: Web server started. Access the interface at: "));
     Serial.println(IP);
   }
 #endif

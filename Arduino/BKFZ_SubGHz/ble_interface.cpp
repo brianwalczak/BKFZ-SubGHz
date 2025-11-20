@@ -31,12 +31,10 @@ static std::vector<uint8_t> dataBuffer;
       
       if (status.detect == "RUNNING") {
         status.detect = "IDLE";
-        Serial.println(F("A websocket user has been disconnected from Frequency Analyzer."));
       }
 
       if (status.record == "RUNNING") {
         stopRecording();
-        Serial.println(F("A websocket user has been disconnected from Recording."));
       }
       
       BLEDevice::startAdvertising();
@@ -75,16 +73,16 @@ static std::vector<uint8_t> dataBuffer;
               const RecordIn* data = reinterpret_cast<const RecordIn*>(packet.data());
 
               if (data->active == 1) {
-                Serial.println(F("Recording has been successfully started with user settings."));
+                Serial.println(F("[RECORD]: Recording session initiated (RX)..."));
                 startRecording();
               } else { 
                 stopRecording();
-                Serial.print(F("Found "));
+                Serial.print(F("[RECORD]: Recording session ended, processing samples... "));
                 Serial.print(String(sampleIndex));
-                Serial.print(F(" RAW samples, smoothing needed."));
+                Serial.println(F(" RAW samples, smoothing needed."));
                 delay(100);
                 smoothenSamples();
-                Serial.println(F("Recording has been successfully finished and samples have been smoothened."));
+                Serial.println(F("[RECORD]: Samples processed, response sent to client."));
 
                 // get packet size, allocate buffer
                 const size_t packetSize = sizeof(RecordOut) + (sampleIndex * sizeof(int16_t));
@@ -125,11 +123,9 @@ static std::vector<uint8_t> dataBuffer;
               // Update settings to new data
               settings.preset = String(data->preset);
               settings.frequency = data->frequency;
-              Serial.println(F("Now playing file requested by user, successfully updated to file settings."));
 
               playSignal(data->samples, data->length);
 
-              Serial.println(F("Successfully played file requested, reverting back to old settings."));
               // Revert settings back to original
               settings.preset = old_preset;
               settings.frequency = old_freq;
@@ -207,7 +203,7 @@ static std::vector<uint8_t> dataBuffer;
               break;
           }
           default:
-              Serial.println(F("Received unknown command via bluetooth, it may have experienced packet loss. :("));
+              Serial.println(F("[BLE]: Received unknown command, it may have experienced packet loss."));
               break;
         }
 
@@ -268,6 +264,6 @@ static std::vector<uint8_t> dataBuffer;
     pAdvertising->setMinPreferred(0x12);
     BLEDevice::startAdvertising();
     
-    Serial.println(F("The Bluetooth server is ready for connections."));
+    Serial.println(F("[BLE]: Bluetooth device is now advertising."));
   }
 #endif

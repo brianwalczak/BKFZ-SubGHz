@@ -39,10 +39,10 @@ void setupCC1101(bool transmit, int retry = false) {
   
   if(!ELECHOUSE_cc1101.getCC1101()) {
     if(!retry) {
-      Serial.println(F("Connection error with CC1101, retrying..."));
+      Serial.println(F("Connection failed with CC1101 module, attempting to reconnect..."));
       setupCC1101(transmit, true);
     } else {
-      Serial.println(F("Failed CC1101 connection retry. Please check your pins."));
+      Serial.println(F("Connection retry failed. Please check your wiring and pin configuration to the CC1101 module."));
     }
   }
 }
@@ -66,7 +66,7 @@ void stopRecording() {
 // Captures and analyzes nearby frequencies w/ RSSI
 void frequencyAnalyzer() {
   status.detect = "RUNNING";
-  Serial.println(F("Frequency analyzer has been started by the user (watch for websockets)."));
+  Serial.println(F("[ANALYZER]: Started frequency analyzer..."));
 
   // Store old settings to revert when done and last seen frequency / RSSI
   int old_freq = settings.frequency;
@@ -108,12 +108,12 @@ void frequencyAnalyzer() {
 
   // Revert settings back to original before
   settings.frequency = old_freq;
-  Serial.println(F("Frequency analyzer has been stopped by the user."));
+  Serial.println(F("[ANALYZER]: Stopped frequency analyzer."));
 }
 
 // Play a signal from client-side file
 void playSignal(const int16_t reqSamples[], uint16_t reqLength) {
-  Serial.println(F("Now transmitting requested samples..."));
+  Serial.println(F("[PLAY]: Transmitting signal samples (TX)..."));
   setupCC1101(true);
 
   for (uint16_t i = 0; i < reqLength; i++) {
