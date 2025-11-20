@@ -1,18 +1,52 @@
 import * as Font from "expo-font";
 import { Stack } from "expo-router";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, View, Text } from "react-native";
+import { ActivityIndicator, View, Text, Animated } from "react-native";
 import { GlobalProvider, useGlobal } from "../providers/GlobalContext";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 function MessageBanner() {
-  const { message } = useGlobal();
-  if (!message) return null;
+  const { message, setMessage } = useGlobal();
+  const [visible, setVisible] = useState(false);
+  const opacity = useState(new Animated.Value(0))[0];
+
+  useEffect(() => {
+    if (message) {
+      setVisible(true);
+
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+
+      const timer = setTimeout(() => {
+        Animated.timing(opacity, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }).start(() => {
+          setMessage(null);
+          setVisible(false);
+        });
+      }, message[2]);
+
+      return () => {
+        clearTimeout(timer);
+        
+        opacity.setValue(0);
+        setVisible(false);
+      };
+    }
+  }, [message, setMessage, opacity]);
+
+  if (!message || !visible) return null;
 
   return (
     <SafeAreaView style={{ position: "absolute", bottom: 40, left: 30, right: 30 }}>
-      <View
+      <Animated.View
         style={{
+          opacity,
           backgroundColor: message[1] === "success" ? "#28a745" : message[1] === "error" ? "#dc3545" : "#fff",
           padding: 16,
           borderRadius: 10,
@@ -26,7 +60,7 @@ function MessageBanner() {
         }}
       >
         <Text style={{ color: "#fff", fontSize: 16, textAlign: "center" }}>{message[0]}</Text>
-      </View>
+      </Animated.View>
     </SafeAreaView>
   );
 }

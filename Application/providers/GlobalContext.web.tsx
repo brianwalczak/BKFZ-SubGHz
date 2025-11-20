@@ -4,7 +4,7 @@ import { buildPacket, parsePacket } from './packets.js';
 const GlobalContext = createContext<any>(undefined);
 
 export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [message, setMessage] = useState<[string, string] | null>(null);
+    const [message, setMessage] = useState<[string, string, number] | null>(null);
     const settingsRef = React.useRef<{ [key: string]: any }>(null);
     const [isConnected, setIsConnected] = useState(false);
     const ws = useRef<WebSocket | null>(null);
@@ -78,8 +78,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                     setIsConnected(false);
 
                     if (!event.wasClean) {
-                        setMessage(['Your connection was lost unexpectedly.', 'error']);
-                        setTimeout(() => setMessage(null), 2000);
+                        setMessage(['Your connection was lost unexpectedly.', 'error', 2000]);
                     }
                 };
             });

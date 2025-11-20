@@ -117,12 +117,10 @@ export default function Settings() {
 
     const save = await updateSettings(newSettings, true);
     if (save) {
-      setMessage(['Your settings have been saved successfully!', 'success']);
+      setMessage(['Your settings have been saved successfully!', 'success', 2000]);
     } else {
-      setMessage(['Failed to save settings. Please try again.', 'error']);
+      setMessage(['Failed to save settings. Please try again.', 'error', 2000]);
     }
-
-    setTimeout(() => setMessage(null), 2000);
   }, [position, setMessage, updateSettings]);
 
   if (!settings || !position) return (

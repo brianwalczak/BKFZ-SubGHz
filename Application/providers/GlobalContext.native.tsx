@@ -21,7 +21,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const [btConnected, setBtConnected] = useState<string | null>(null);
     const [btInit, setBtInit] = useState<boolean>(false);
     const [devices, setDevices] = useState<any[]>([]);
-    const [message, setMessage] = useState<[string, string] | null>(null);
+    const [message, setMessage] = useState<[string, string, number] | null>(null);
     const disconnectIntent = React.useRef<boolean | null>(null);
 
     const startScanSub = React.useRef<EventSubscription | null>(null);
@@ -427,8 +427,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     useEffect(() => {
         if (!btConnected) {
             if (disconnectIntent.current === false) {
-                setMessage(['Your connection was lost unexpectedly.', 'error']);
-                setTimeout(() => setMessage(null), 2000);
+                setMessage(['Your connection was lost unexpectedly.', 'error', 2000]);
             }
 
             disconnectIntent.current = false;
