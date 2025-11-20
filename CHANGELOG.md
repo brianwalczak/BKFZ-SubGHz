@@ -24,7 +24,6 @@
 - [x] Minor code reconstruction to minimize memory usage
 - [x] Make improvements for WiFi-based connection (`.html` pages)
 - [ ] Make small UI improvements client-side
-- [ ] Improve storage system (maybe device storage?)
 - [ ] Update `README.md` to improve instructions and clarity
 
 ---
@@ -40,6 +39,37 @@ https://github.com/user-attachments/assets/2cbcb2d0-29df-4d65-81d4-cca5f9d6b237
 ---
 
 ## Timeline
+
+### 11/19/2025
+- Added support for **Press Start 2P** font on web platform
+- Added command events for WebSocket data in `wifi_interface.cpp`
+- Patched minor bugs for sending / receiving data with WebSockets
+- Added web compatibility for `record.tsx` (update download logic)
+- Removed unnecessary functions, phased out `ArduinoJson` from project
+- Uploaded initial build of React web app w/ `gzip` compression
+- Created connection timeout for WebSockets (`Promise`)
+- Added an unexpected disconnect warning message
+- Improved clarity across `Serial.println` messages
+- Updated message popup logic, and included fade animation
+- Quick commit to set Bluetooth as default connection mode
+
+### 11/18/2025
+- Created `gzip` compression helper for web exports (brotli not supported on HTTP!)
+- Started rebuilding `wifi_interface.cpp`, added static file serving
+- Fixed back navigation logic for multi-platform support
+- Removed connect page for web platform, created custom `index.tsx` w/ connectivity
+- Created other minor improvements / fixes
+
+### 11/17/2025
+- Modified array declarations to minimize memory usage
+- Fixed comments throughout code for clarity
+- Migrated to `expo-document-picker` for web compatibility
+- Updated file reading to handle both native and web platforms
+- Created separate `GlobalContext.tsx` for native and web platforms
+- Started WebSocket implementation in global context
+- Created a connect page for web platform
+- Updated imports for `@expo/vector-icons` to reduce storage size
+- Replaced **Ionicons** and Bluetooth from **MaterialIcons** to **Feather** instead
 
 ### 11/14/2025
 - Fix bugs and type safety for settings, add null checks
