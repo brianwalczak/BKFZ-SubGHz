@@ -22,9 +22,9 @@
 - [x] Test functionality on iOS devices, make changes
 - [x] Create new revamped icons and assets
 - [x] Minor code reconstruction to minimize memory usage
+- [x] Make improvements for WiFi-based connection (`.html` pages)
 - [ ] Make small UI improvements client-side
 - [ ] Improve storage system (maybe device storage?)
-- [ ] Make improvements for WiFi-based connection (`.html` pages)
 - [ ] Update `README.md` to improve instructions and clarity
 
 ---
