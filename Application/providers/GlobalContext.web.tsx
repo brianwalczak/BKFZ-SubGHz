@@ -44,8 +44,6 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
         ws.current.onopen = async () => {
             setIsConnected(true);
-            console.log("WebSocket connected");
-
             ws.current?.send(buildPacket("/settings", { method: 'get' }));
         };
 

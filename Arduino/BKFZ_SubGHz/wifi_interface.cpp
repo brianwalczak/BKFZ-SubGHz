@@ -40,10 +40,7 @@
         Serial.printf("WebSocket error: %s\n", (char*)arg);
         break;
       case WS_EVT_DATA: {
-        Serial.println(F("Received data via websocket."));
         std::vector<uint8_t> packet(data, data + len);
-        
-        // do stuff with the packet here
         uint16_t p_len = packet[0] | (packet[1] << 8); // extract packet length (2 bytes)
         uint8_t cmd = packet[2]; // extract command (1 byte)
 

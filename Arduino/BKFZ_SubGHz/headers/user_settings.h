@@ -2,7 +2,6 @@
 #define USERSETTINGS_H
 
 #include <Arduino.h>
-#include <ArduinoJson.h>
 #include <Preferences.h>
 #include <vector>
 
@@ -32,7 +31,6 @@ extern Settings settings;
 extern Status status;
 extern Preferences preferences;
 
-String settingsToJson();
 void saveSettings();
 void loadSettings();
 

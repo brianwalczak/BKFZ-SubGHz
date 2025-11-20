@@ -26,20 +26,6 @@ Status status = {
   "IDLE" // Recording (record)
 };
 
-// Converts the user settings as a readable JSON string (courtesy of ChatGPT)
-String settingsToJson() {
-  DynamicJsonDocument doc(256);
-
-  doc["preset"] = settings.preset;
-  doc["frequency"] = settings.frequency;
-  doc["rssi"] = settings.rssi;
-  doc["detect_rssi"] = settings.detect_rssi;
-
-  String jsonString;
-  serializeJson(doc, jsonString);
-  return jsonString;
-}
-
 // Loads the saved settings/configurations from non-volatile storage
 void loadSettings() {
   preferences.begin("settings", false);

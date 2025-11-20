@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useGlobal } from "../providers/GlobalContext";
 import { convertFile, convertSamples } from "../providers/utils";
-import { File, Paths } from 'expo-file-system';
+import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import Back from "../components/back";
 
@@ -104,19 +104,33 @@ export default function Record() {
     if (!output) return false;
 
     try {
-      const saveNow = !(await Sharing.isAvailableAsync());
+      if (Platform.OS === 'web' && typeof window !== 'undefined' && window.document) {
+        const blob = new Blob([output], { type: "text/plain" });
+        const url = window.URL.createObjectURL(blob);
 
-      const file = new File(saveNow ? Paths.document : Paths.cache, 'BKFZ_Recording_' + Date.now() + '.sub');
-      file.create();
-      file.write(output);
+        const a = window.document.createElement("a");
+        a.href = url;
+        a.download = "BKFZ_Recording_" + Date.now() + ".sub";
+        window.document.body.appendChild(a);
+        a.click();
 
-      if (saveNow) {
-        alert('Your recording has been saved to your documents folder as ' + file.name + '.');
+        window.document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
       } else {
-        await Sharing.shareAsync(file.uri, {
-          mimeType: 'text/plain',
-          dialogTitle: 'Save your SubGHz recording to your device.'
-        });
+        const saveNow = !(await Sharing.isAvailableAsync());
+
+        const file = new FileSystem.File(saveNow ? FileSystem.Paths.document : FileSystem.Paths.cache, 'BKFZ_Recording_' + Date.now() + '.sub');
+        file.create();
+        file.write(output);
+
+        if (saveNow) {
+          alert('Your recording has been saved to your documents folder as ' + file.name + '.');
+        } else {
+          await Sharing.shareAsync(file.uri, {
+            mimeType: 'text/plain',
+            dialogTitle: 'Save your SubGHz recording to your device.'
+          });
+        }
       }
     } catch (e: any) {
       alert('An error occurred while saving your recording. ' + e.message);

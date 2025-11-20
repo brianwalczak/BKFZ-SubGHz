@@ -94,7 +94,7 @@ export default function Index() {
                     styles.button,
                     connecting && { opacity: 0.5 } // gray out when disabled
                 ]} activeOpacity={0.8} onPress={connect} disabled={connecting}>
-                    <Text style={styles.buttonText}>Connect</Text>
+                    <Text style={styles.buttonText}>{connecting ? "Connecting..." : "Connect"}</Text>
                 </TouchableOpacity>
                 <Text style={styles.small}>Stay connected to the device&apos;s Wi-Fi network.</Text>
             </View>
