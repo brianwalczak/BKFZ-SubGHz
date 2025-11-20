@@ -22,6 +22,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const [btInit, setBtInit] = useState<boolean>(false);
     const [devices, setDevices] = useState<any[]>([]);
     const [message, setMessage] = useState<[string, string] | null>(null);
+    const disconnectIntent = React.useRef<boolean | null>(null);
 
     const startScanSub = React.useRef<EventSubscription | null>(null);
     const stopScanSub = React.useRef<EventSubscription | null>(null);
@@ -113,6 +114,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         if (!permissions || !btInit) return false;
         if (btConnected) {
             try {
+                disconnectIntent.current = true;
                 await BleManager.disconnect(btConnected);
             } catch { };
         }
@@ -309,6 +311,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                         CHUNK_SIZE = 20; // reset chunk size on new connection
                         dataLength = 0; // reset expected data length
                         dataBuffer = new Uint8Array(0); // reset data buffer
+                        disconnectIntent.current = false; // reset disconnect intent
 
                         try {
                             await BleManager.retrieveServices(device?.peripheral);
@@ -420,6 +423,17 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             }
         };
     }, [btState, permissions, btConnected, btInit]);
+
+    useEffect(() => {
+        if (!btConnected) {
+            if (disconnectIntent.current === false) {
+                setMessage(['Your connection was lost unexpectedly.', 'error']);
+                setTimeout(() => setMessage(null), 2000);
+            }
+
+            disconnectIntent.current = false;
+        }
+    }, [btConnected]);
 
     // remove old devices if no longer seen
     useEffect(() => {

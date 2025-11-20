@@ -39,37 +39,64 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }, [isConnected]);
 
     const connectDevice = useCallback(async () => {
-        if (isConnected) return await disconnectDevice();
-        ws.current = new WebSocket(`ws://${window.location.host}/ws`);
+        if (isConnected) await disconnectDevice();
+        let timeoutId: ReturnType<typeof setTimeout>;
 
-        ws.current.onopen = async () => {
-            setIsConnected(true);
-            ws.current?.send(buildPacket("/settings", { method: 'get' }));
-        };
+        try {
+            const connect = new Promise<boolean>((resolve) => {
+                ws.current = new WebSocket(`ws://${window.location.host}/ws`);
 
-        ws.current.onmessage = async function (event) {
-            try {
-                const buffer = await event.data.arrayBuffer();
-                const chunk = new Uint8Array(buffer);
+                ws.current.onopen = async () => {
+                    setIsConnected(true);
+                    ws.current?.send(buildPacket("/settings", { method: 'get' }));
 
-                if (chunk.length >= 2) {
-                    const parsed = parsePacket(chunk.buffer);
+                    clearTimeout(timeoutId);
+                    resolve(true);
+                };
 
-                    if (parsed.page && dataCallbacks.current[parsed.page]) {
-                        dataCallbacks.current[parsed.page].forEach(cb => cb(parsed.data));
+                ws.current.onmessage = async function (event) {
+                    try {
+                        const buffer = await event.data.arrayBuffer();
+                        const chunk = new Uint8Array(buffer);
+
+                        if (chunk.length >= 2) {
+                            const parsed = parsePacket(chunk.buffer);
+
+                            if (parsed.page && dataCallbacks.current[parsed.page]) {
+                                dataCallbacks.current[parsed.page].forEach(cb => cb(parsed.data));
+                            }
+
+                            if (parsed?.page === "/settings") {
+                                settingsRef.current = parsed?.data || null;
+                            }
+                        }
+                    } catch { };
+                };
+
+                ws.current.onclose = function (event) {
+                    ws.current = null;
+                    setIsConnected(false);
+
+                    if (!event.wasClean) {
+                        setMessage(['Your connection was lost unexpectedly.', 'error']);
+                        setTimeout(() => setMessage(null), 2000);
                     }
+                };
+            });
 
-                    if (parsed?.page === "/settings") {
-                        settingsRef.current = parsed?.data || null;
-                    }
-                }
-            } catch { };
-        };
+            // 10 second timeout for connection attempts
+            const timeout = new Promise<boolean>((resolve) => {
+                timeoutId = setTimeout(() => {
+                    ws.current?.close();
+                    resolve(false);
+                }, 10000);
+            });
 
-        ws.current.onclose = function (event) {
-            ws.current = null;
-            setIsConnected(false);
-        };
+            return await Promise.race([connect, timeout]);
+        } catch {
+            ws.current?.close();
+            return false;
+        }
     }, [isConnected, disconnectDevice]);
 
     const sendData = useCallback(async (payload: { page: string, data: object }) => {
