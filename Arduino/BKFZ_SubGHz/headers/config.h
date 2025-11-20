@@ -30,7 +30,7 @@ constexpr int MAX_SAMPLES = 8000;
 constexpr int ERROR_TOLERANCE = 200;
 
 // Choose a connection mode ("WIFI" or "BLE")
-#define CONNECTION_MODE CONNECTION_MODE_WIFI
+#define CONNECTION_MODE CONNECTION_MODE_BLE
 
 /* WiFi Configuration */
 constexpr const char* ssid = "BKFZ SubGHz"; // Set an SSID for the access point
