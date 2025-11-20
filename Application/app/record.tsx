@@ -221,7 +221,7 @@ export default function Record() {
           <TouchableOpacity style={[styles.button, (recording ? { backgroundColor: "#dc3545" } : { backgroundColor: "#28a745" })]} activeOpacity={0.8} onPress={() => triggerRecording(!recording)}>
             <Text style={styles.buttonText}>{recording ? "Stop" : "Record"}</Text>
           </TouchableOpacity>
-          <Text style={styles.status}>{(!settings || !settings?.preset || !settings?.frequency || !settings?.rssi) ? 'Loading, please wait...' : `${settings.preset} | ${(settings.frequency / 1000000).toFixed(2)} MHz | ${settings.rssi.toString() === "-200" ? 'Any' : settings.rssi} RSSI`}</Text>
+          <Text style={styles.status}>{(!settings || !settings?.preset || !settings?.frequency || !settings?.rssi) ? 'Loading, please wait...' : `${settings.preset} | ${(settings.frequency / 1000000).toFixed(2)} MHz | ${settings.rssi.toString() === "1" ? 'Any' : settings.rssi} RSSI`}</Text>
 
           <View style={styles.graph}>
             {graphData.map((val, idx) => (

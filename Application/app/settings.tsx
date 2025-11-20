@@ -102,7 +102,7 @@ export default function Settings() {
     const val = settingsOptions[key][position[key]];
 
     if (key === "frequency") return (val / 1000000).toFixed(2) + " MHz";
-    if (key === "rssi") return val === -200 ? "- - - - -" : val + " dBm";
+    if (key === "rssi") return val === 1 ? "- - - - -" : val + " dBm";
     return val;
   }, [position]);
 

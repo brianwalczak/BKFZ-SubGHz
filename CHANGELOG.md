@@ -52,6 +52,7 @@ https://github.com/user-attachments/assets/2cbcb2d0-29df-4d65-81d4-cca5f9d6b237
 - Improved clarity across `Serial.println` messages
 - Updated message popup logic, and included fade animation
 - Quick commit to set Bluetooth as default connection mode
+- Fixed critical bug with disabled RSSI threshold
 
 ### 11/18/2025
 - Created `gzip` compression helper for web exports (brotli not supported on HTTP!)
