@@ -1,8 +1,5 @@
 # Changelog | BKFZ SubGHz
 
-> [!WARNING]
-> **This project is currently under heavy construction and updates are documented here. As of now, it's recommended that you download a stable release for usage. If you encounter any issues or have a suggestion, please report it <a href='https://github.com/BrianWalczak/BKFZ-SubGHz/issues'>here</a>.**
-
 ## Roadmap
 
 - [x] Create an app using React Native
@@ -23,22 +20,24 @@
 - [x] Create new revamped icons and assets
 - [x] Minor code reconstruction to minimize memory usage
 - [x] Make improvements for WiFi-based connection (`.html` pages)
-- [ ] Make small UI improvements client-side
-- [ ] Update `README.md` to improve instructions and clarity
+- [x] Update `README.md` to improve instructions and clarity
 
 ---
 
 ## 📱 App Demo (Bluetooth)
 
-https://github.com/user-attachments/assets/b6bdef06-8ae8-4c16-bf7c-1fd887ece572
+https://github.com/user-attachments/assets/3f9ae117-1401-43c5-9235-534f86dca0eb
 
 ## 🌐 Web Demo (WiFi / Access Point)
 
-https://github.com/user-attachments/assets/2cbcb2d0-29df-4d65-81d4-cca5f9d6b237
+https://github.com/user-attachments/assets/d5fcab91-d8fd-4988-91c3-9640dd40cf5b
 
 ---
 
 ## Timeline
+
+### 11/20/2025
+- Improve `README.md` instructions, publish release!
 
 ### 11/19/2025
 - Added support for **Press Start 2P** font on web platform
