@@ -148,4 +148,4 @@ That's great to hear! You can submit any feedback, or any bugs that you find, on
 I'm glad to hear that you find this project useful! If you'd like to support this project and its development, you can send me a tip <a href='https://ko-fi.com/brianwalczak'>here</a> 😁
 
 <br>
-  <p align="center">Made with ♡ by <a href="https://www.brianwalczak.com">Briann</a></p>
+  <p align="center">Made with ♡ by <a href="https://brian.re/">Briann</a></p>
