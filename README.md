@@ -1,6 +1,13 @@
 <h1 align="center">BKFZ SubGHz</h1>
 <p align="center">A robust program for your ESP32 to capture and replay SubGHz frequencies, inspired by the Flipper Zero and written in Arduino + React Native.</p>
 
+<p align="center">
+  <img src="Other/Mockups/4.png" width="200"/>
+  <img src="Other/Mockups/5.png" width="200"/>
+  <img src="Other/Mockups/6.png" width="200"/>
+  <img src="Other/Mockups/7.png" width="200"/>
+</p>
+
 > [!WARNING]
 > **Heads up! Major changes have been made since the previous release. If you encounter any issues, please report them <a href='https://github.com/brianwalczak/BKFZ-SubGHz/issues'>here</a>.**
 
