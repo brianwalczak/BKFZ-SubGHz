@@ -1,5 +1,5 @@
 #include "headers/interface.h"
-#include <headers/config.h>
+#include "headers/config.h"
 
 #if CONNECTION_MODE == CONNECTION_MODE_WIFI
   #include <WiFi.h>
@@ -7,9 +7,9 @@
   #include <AsyncTCP.h>
   #include <LittleFS.h>
 
-  #include <headers/user_settings.h>
-  #include <headers/globals.h>
-  #include <headers/packets.h>
+  #include "headers/user_settings.h"
+  #include "headers/globals.h"
+  #include "headers/packets.h"
 
   AsyncWebServer server(SERVER_PORT);
   AsyncWebSocket ws("/ws");

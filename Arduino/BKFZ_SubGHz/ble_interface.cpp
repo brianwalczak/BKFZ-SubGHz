@@ -1,5 +1,5 @@
 #include "headers/interface.h"
-#include <headers/config.h>
+#include "headers/config.h"
 static uint16_t dataLength = 0;
 static std::vector<uint8_t> dataBuffer;
 
@@ -9,9 +9,9 @@ static std::vector<uint8_t> dataBuffer;
   #include <BLEServer.h>
   #include <BLE2902.h>
 
-  #include <headers/user_settings.h>
-  #include <headers/globals.h>
-  #include <headers/packets.h>
+  #include "headers/user_settings.h"
+  #include "headers/globals.h"
+  #include "headers/packets.h"
 
   #define SERVICE_UUID "b1513422-2e10-4528-b293-39409019252f" // random service UUID
   #define TX_CHAR_UUID "cffa88bb-f8ac-423b-9031-0266d4f3aec1" // ESP32 to da app

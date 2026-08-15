@@ -3,12 +3,12 @@
 #include <Arduino.h>
 #include <SPI.h>
 
-#include <headers/config.h>
-#include <headers/presets.h>
-#include <headers/user_settings.h>
-#include <headers/interface.h>
-#include <headers/globals.h>
-#include <headers/packets.h>
+#include "headers/config.h"
+#include "headers/presets.h"
+#include "headers/user_settings.h"
+#include "headers/interface.h"
+#include "headers/globals.h"
+#include "headers/packets.h"
 
 int16_t samples[MAX_SAMPLES];
 volatile int sampleIndex = 0;
