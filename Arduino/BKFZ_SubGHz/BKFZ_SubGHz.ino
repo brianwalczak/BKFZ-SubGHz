@@ -2,6 +2,7 @@
 #include <esp_attr.h>
 #include <Arduino.h>
 #include <SPI.h>
+#include <climits>
 
 #include "headers/config.h"
 #include "headers/presets.h"
@@ -35,6 +36,10 @@ void setupCC1101(bool transmit, int retry = false) {
   }
 
   const Preset* preset = findPreset(settings.preset);
+  if (preset == nullptr) {
+    Serial.println(F("[CC1101]: Unknown preset configured, falling back to default (AM650)."));
+    preset = findPreset("AM650");
+  }
   applyConfiguration(preset->data, preset->length);
   
   if(!ELECHOUSE_cc1101.getCC1101()) {
@@ -74,7 +79,7 @@ void frequencyAnalyzer() {
   int lastRSSI = 0;
 
   while(status.detect == "RUNNING") {
-    int highestRssi = -INFINITY;
+    int highestRssi = INT_MIN;
     int strongestFreq = 0;
 
     for(int frequency : hopperFrequenciesUSA) {
@@ -91,7 +96,7 @@ void frequencyAnalyzer() {
     }
 
     // If the signal is unique compared to last time, send through websocket
-    if(strongestFreq != lastFrequency && highestRssi != lastRSSI && (strongestFreq != 0 && highestRssi != -INFINITY)) {
+    if(strongestFreq != lastFrequency && highestRssi != lastRSSI && (strongestFreq != 0 && highestRssi != INT_MIN)) {
       // Set the frequency to last seen (used to prevent repetition of the same signal)
       lastFrequency = strongestFreq;
       lastRSSI = highestRssi;
@@ -130,7 +135,9 @@ void playSignal(const int16_t reqSamples[], uint16_t reqLength) {
 // Smoothens out the RAW samples to correct format (written with generative AI)
 void smoothenSamples() {
   #define signalstorage 10
-  
+
+  if (sampleIndex <= 1) return; // nothing meaningful recorded, avoid read
+
   // Initialize variables for signal storage, counts, and sums
   int signalanz = 0;
   int timingdelay[signalstorage];
